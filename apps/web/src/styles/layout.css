@@ -100,6 +100,7 @@ body[data-surface="light"] { color: var(--ink); }
   height: 56px;
   width: auto;
   display: block;
+  border-radius: 6px;
 }
 .header-logo .wordmark {
   font-family: "Manrope", sans-serif;

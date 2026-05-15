@@ -4,8 +4,8 @@ export function Header() {
       <div className="header-logo">
         <img
           className="fari-logo"
-          src="/fari-logo-white.png"
-          alt="FARI — AI for the Common Good · Brussels"
+          src="/logo-voetbal.png"
+          alt="FARI — AI for the Common Good · Brussels (WK 2026 editie)"
         />
       </div>
       <div className="header-title">
