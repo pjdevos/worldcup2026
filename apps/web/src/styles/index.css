@@ -1,0 +1,8 @@
+/* Prototype CSS lifted from handoff/styles.css — the visual source-of-truth.
+   Tailwind utilities are available for new screens; existing class names
+   (.shell, .header, .match, .group, .tabs, .footer, …) come from here. */
+@import "./layout.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

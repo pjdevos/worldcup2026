@@ -1,0 +1,16 @@
+{
+  "name": "pronostiek",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter web typecheck",
+    "seed:gen": "tsx supabase/seed/generate.ts"
+  },
+  "packageManager": "pnpm@11.1.2",
+  "devDependencies": {
+    "tsx": "^4.21.1"
+  }
+}
