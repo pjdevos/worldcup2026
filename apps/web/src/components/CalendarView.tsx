@@ -1,4 +1,5 @@
-import { Fragment, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   FINAL,
   GROUP_STAGE,
@@ -6,11 +7,15 @@ import {
   R16,
   R32,
   SF,
+  TEAMS,
   THIRD_PLACE,
   type GroupMatch,
   type KnockoutTie,
 } from "../data/wk";
 import { fmtDate, fullWeekday } from "../lib/format";
+import { useAuth } from "../lib/auth";
+import type { DbPrediction } from "../lib/database.types";
+import { listMyPredictions, upsertPrediction } from "../lib/queries";
 import { MatchRow, type MatchRowData, type StageLabel } from "./MatchRow";
 
 interface AnyMatch extends MatchRowData {
@@ -20,7 +25,7 @@ interface AnyMatch extends MatchRowData {
 
 function tieToRow(t: KnockoutTie, stage: StageLabel): AnyMatch {
   return {
-    id: t.n, // 73-104, matches DB match.id
+    id: t.n,
     date: t.date,
     kick: t.kick,
     home: t.left,
@@ -33,7 +38,7 @@ function tieToRow(t: KnockoutTie, stage: StageLabel): AnyMatch {
 
 function groupToRow(m: GroupMatch, idx: number): AnyMatch {
   return {
-    id: idx + 1, // 1-72, matches DB match.id (positional)
+    id: idx + 1,
     date: m.date,
     kick: m.kick,
     home: m.home,
@@ -54,7 +59,25 @@ function stageOf(date: string): string {
   return "Finale";
 }
 
+/** Construct the UTC instant for a Brussels-local date+time. */
+function toKickAt(m: AnyMatch): Date {
+  return new Date(`${m.date}T${m.kick}:00+02:00`);
+}
+
+const LOCK_MS = 5 * 60 * 1000;
+
 export function CalendarView() {
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  const qc = useQueryClient();
+
+  // Tick a local clock every 30s so the editable/locked transition is live.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
   const allMatches = useMemo<AnyMatch[]>(() => {
     return [
       ...GROUP_STAGE.map((m, i) => groupToRow(m, i)),
@@ -99,8 +122,44 @@ export function CalendarView() {
     return out;
   }, [days]);
 
+  // Load the user's predictions. RLS guarantees we only see our own
+  // pre-kickoff predictions; for post-kickoff matches anyone's are
+  // readable but we keep the query scoped to ours by user_id.
+  const predictionsQ = useQuery<DbPrediction[]>({
+    queryKey: ["my-predictions", userId ?? "anon"],
+    queryFn: () => (userId ? listMyPredictions(userId) : Promise.resolve([])),
+    enabled: Boolean(userId),
+  });
+
+  const predictionsByMatch = useMemo(() => {
+    const m = new Map<number, DbPrediction>();
+    for (const p of predictionsQ.data ?? []) m.set(p.match_id, p);
+    return m;
+  }, [predictionsQ.data]);
+
+  const saveMutation = useMutation({
+    mutationFn: async ({
+      matchId,
+      home,
+      away,
+    }: {
+      matchId: number;
+      home: number;
+      away: number;
+    }) => {
+      if (!userId) throw new Error("Niet ingelogd");
+      await upsertPrediction(userId, matchId, home, away);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["my-predictions", userId ?? "anon"],
+      });
+    },
+  });
+
   const active = days.find((d) => d.date === activeDate);
   const stage = active ? stageOf(active.date) : "";
+  const now = Date.now();
 
   return (
     <div className="section">
@@ -108,6 +167,9 @@ export function CalendarView() {
         <h2>Volledige speelkalender</h2>
         <div className="hint">
           {days.length} speeldagen · 104 wedstrijden · alle aftraptijden in Brusselse tijd
+          {userId
+            ? " · klik op +/− om je voorspelling op te slaan"
+            : " · log in om voorspellingen in te vullen"}
         </div>
       </div>
       <div className="calendar">
@@ -144,9 +206,27 @@ export function CalendarView() {
                 <div className="stage-pill">{stage}</div>
               </div>
               <div>
-                {active.matches.map((m, i) => (
-                  <MatchRow key={i} match={m} />
-                ))}
+                {active.matches.map((m) => {
+                  const teamsKnown =
+                    !!TEAMS[m.home] && !!TEAMS[m.away];
+                  const kickAt = toKickAt(m).getTime();
+                  const editable =
+                    Boolean(userId) &&
+                    teamsKnown &&
+                    now < kickAt - LOCK_MS;
+                  const prediction = m.id != null ? predictionsByMatch.get(m.id) ?? null : null;
+                  return (
+                    <MatchRow
+                      key={`${m.date}-${m.kick}-${m.id ?? m.home}`}
+                      match={m}
+                      prediction={prediction}
+                      editable={editable}
+                      onSave={(matchId, home, away) =>
+                        saveMutation.mutate({ matchId, home, away })
+                      }
+                    />
+                  );
+                })}
               </div>
             </>
           )}

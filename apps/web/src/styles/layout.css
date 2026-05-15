@@ -479,7 +479,7 @@ body[data-surface="light"] { color: var(--ink); }
 /* ── Match rows ───────────────────────────────────────────────────────── */
 .match {
   display: grid;
-  grid-template-columns: 80px 56px 1fr 40px 1fr;
+  grid-template-columns: 70px 48px 1fr 240px 1fr;
   align-items: center;
   gap: 14px;
   padding: 14px 18px;
