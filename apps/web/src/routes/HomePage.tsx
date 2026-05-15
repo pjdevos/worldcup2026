@@ -130,11 +130,10 @@ function Hero({ session }: { session: boolean }) {
           alt="WK 2026 — FARI pronostiek"
           style={{
             position: "relative",
-            maxHeight: 440,
+            maxHeight: 480,
             width: "auto",
             maxWidth: "100%",
-            borderRadius: 14,
-            boxShadow: "0 28px 80px -20px rgba(0,0,0,0.55)",
+            filter: "drop-shadow(0 24px 50px rgba(0,0,0,0.55))",
           }}
         />
       </div>
