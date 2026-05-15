@@ -166,3 +166,75 @@ export async function getLeaderboard(): Promise<LeaderboardRow[]> {
   if (error) throw error;
   return (data ?? []) as LeaderboardRow[];
 }
+
+// ── Cron logs (admin only via RLS) ──────────────────────────────────────
+
+import type { DbCronLog } from "./database.types";
+
+export interface CronStatus {
+  lastRun: DbCronLog | null;
+  autoUpdatedToday: number;
+  recent: DbCronLog[];
+}
+
+export async function getCronStatus(): Promise<CronStatus> {
+  const [logsRes, todayRes] = await Promise.all([
+    supabase
+      .from("cron_logs")
+      .select("*")
+      .eq("job", "fetch-results")
+      .order("ran_at", { ascending: false })
+      .limit(10),
+    supabase
+      .from("matches")
+      .select("id", { count: "exact", head: true })
+      .eq("result_source", "cron")
+      .gte(
+        "result_entered_at",
+        new Date(new Date().toISOString().slice(0, 10)).toISOString(),
+      ),
+  ]);
+
+  if (logsRes.error) throw logsRes.error;
+  if (todayRes.error) throw todayRes.error;
+
+  const logs = (logsRes.data ?? []) as DbCronLog[];
+  return {
+    lastRun: logs[0] ?? null,
+    autoUpdatedToday: todayRes.count ?? 0,
+    recent: logs,
+  };
+}
+
+export interface FetchNowResult {
+  ok: boolean;
+  checked: number;
+  updated: number;
+  errors: number;
+  error_message?: string;
+}
+
+/**
+ * Trigger the cron logic manually. Calls /api/admin/fetch-now with the
+ * current Supabase access token; server-side checks is_admin.
+ */
+export async function triggerFetchNow(): Promise<FetchNowResult> {
+  const { data: sessionRes } = await supabase.auth.getSession();
+  const token = sessionRes.session?.access_token;
+  if (!token) throw new Error("Niet ingelogd");
+
+  const res = await fetch("/api/admin/fetch-now", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) {
+    throw new Error(
+      (body.error as string) ?? `HTTP ${res.status}`,
+    );
+  }
+  return body as unknown as FetchNowResult;
+}

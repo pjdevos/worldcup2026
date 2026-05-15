@@ -1,12 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { TEAMS } from "../data/wk";
-import type { DbMatch, DbScoringRule } from "../lib/database.types";
+import type { DbCronLog, DbMatch, DbScoringRule } from "../lib/database.types";
 import { formatKickoff } from "../lib/matchHelpers";
 import {
+  getCronStatus,
   listMatches,
   listScoringRules,
   setMatchResultAndScore,
+  triggerFetchNow,
+  type CronStatus,
+  type FetchNowResult,
 } from "../lib/queries";
 import { supabase } from "../lib/supabase";
 
@@ -28,6 +32,8 @@ export function AdminPage() {
 
   return (
     <>
+      <CronStatusPanel />
+
       <div className="section">
         <div className="section-head">
           <h2>Admin · Resultaten invoeren</h2>
@@ -258,4 +264,208 @@ function ScoringRulesEditor() {
 function nameOf(code: string | null, slot: string | null): string {
   if (code && TEAMS[code]) return TEAMS[code].name;
   return slot ?? "TBD";
+}
+
+// ─── Cron status + manual "Fetch now" ─────────────────────────────────
+
+function CronStatusPanel() {
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery<CronStatus>({
+    queryKey: ["cron-status"],
+    queryFn: getCronStatus,
+    refetchInterval: 60_000,
+  });
+
+  const [lastResult, setLastResult] = useState<FetchNowResult | null>(null);
+  const fetchNow = useMutation({
+    mutationFn: triggerFetchNow,
+    onSuccess: (res) => {
+      setLastResult(res);
+      void qc.invalidateQueries({ queryKey: ["cron-status"] });
+      void qc.invalidateQueries({ queryKey: ["matches"] });
+      void qc.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+  });
+
+  const lastRun = data?.lastRun;
+  const lastRunRel = lastRun ? relTime(new Date(lastRun.ran_at)) : "nog niet gelopen";
+
+  return (
+    <div className="section">
+      <div className="section-head">
+        <h2 style={{ fontSize: 18 }}>Auto-fetch · football-data.org</h2>
+        <div className="hint">
+          De cron draait elk uur en haalt eindstanden binnen. Manueel triggeren kan met de knop hieronder.
+        </div>
+      </div>
+
+      {isLoading && <div className="hint">Laden…</div>}
+
+      {data && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr auto",
+            gap: 12,
+            alignItems: "start",
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid var(--line-soft)",
+            borderRadius: 12,
+            padding: 16,
+          }}
+        >
+          <Stat label="Laatste run" value={lastRunRel}>
+            {lastRun && (
+              <span style={{ fontSize: 11, opacity: 0.6 }}>
+                checked: {lastRun.checked} · updated: {lastRun.updated} · errors: {lastRun.errors}
+              </span>
+            )}
+          </Stat>
+          <Stat label="Vandaag automatisch" value={`${data.autoUpdatedToday} match${data.autoUpdatedToday === 1 ? "" : "es"}`} />
+          <button
+            type="button"
+            onClick={() => fetchNow.mutate()}
+            disabled={fetchNow.isPending}
+            className="tab is-active"
+            style={{
+              padding: "10px 18px",
+              cursor: fetchNow.isPending ? "wait" : "pointer",
+              alignSelf: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {fetchNow.isPending ? "Bezig…" : "Fetch now"}
+          </button>
+        </div>
+      )}
+
+      {fetchNow.isError && (
+        <div style={{ color: "#ff8a8a", fontSize: 12, marginTop: 8 }}>
+          {fetchNow.error instanceof Error ? fetchNow.error.message : String(fetchNow.error)}
+        </div>
+      )}
+
+      {lastResult && !fetchNow.isPending && (
+        <div
+          style={{
+            fontSize: 12,
+            marginTop: 8,
+            color: lastResult.ok ? "var(--fari-mint-bright)" : "#ff8a8a",
+          }}
+        >
+          {lastResult.ok ? "✓ " : "⚠ "}
+          checked: {lastResult.checked} · updated: {lastResult.updated} · errors: {lastResult.errors}
+          {lastResult.error_message && <> · {lastResult.error_message}</>}
+        </div>
+      )}
+
+      {data && data.recent.length > 0 && (
+        <details style={{ marginTop: 12 }}>
+          <summary
+            style={{
+              cursor: "pointer",
+              fontSize: 11,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              opacity: 0.7,
+            }}
+          >
+            Recente runs ({data.recent.length})
+          </summary>
+          <table style={{ width: "100%", marginTop: 8, borderCollapse: "collapse", fontSize: 12 }}>
+            <thead>
+              <tr>
+                <TableHead>Tijd</TableHead>
+                <TableHead style={{ textAlign: "right" }}>Checked</TableHead>
+                <TableHead style={{ textAlign: "right" }}>Updated</TableHead>
+                <TableHead style={{ textAlign: "right" }}>Errors</TableHead>
+              </tr>
+            </thead>
+            <tbody>
+              {data.recent.map((l) => (
+                <LogRow key={l.id} log={l} />
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
+    </div>
+  );
+}
+
+function LogRow({ log }: { log: DbCronLog }) {
+  return (
+    <tr>
+      <TableCell style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 11 }}>
+        {new Date(log.ran_at).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" })}
+      </TableCell>
+      <TableCell style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace" }}>{log.checked}</TableCell>
+      <TableCell style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace" }}>{log.updated}</TableCell>
+      <TableCell style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: log.errors > 0 ? "#ff8a8a" : undefined }}>
+        {log.errors}
+      </TableCell>
+    </tr>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  children,
+}: {
+  label: string;
+  value: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div style={{ fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", opacity: 0.6, fontWeight: 700, marginBottom: 4 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 2 }}>{value}</div>
+      {children}
+    </div>
+  );
+}
+
+function TableHead({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <th
+      style={{
+        padding: "8px 10px",
+        textAlign: "left",
+        fontSize: 9,
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        opacity: 0.6,
+        borderBottom: "1px solid var(--line-soft)",
+        ...style,
+      }}
+    >
+      {children}
+    </th>
+  );
+}
+
+function TableCell({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <td
+      style={{
+        padding: "6px 10px",
+        borderBottom: "1px solid var(--line-soft)",
+        ...style,
+      }}
+    >
+      {children}
+    </td>
+  );
+}
+
+function relTime(d: Date): string {
+  const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (diffSec < 60) return "net";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} min geleden`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} u geleden`;
+  return d.toLocaleDateString("nl-BE", { day: "numeric", month: "short", timeZone: "Europe/Brussels" });
 }
