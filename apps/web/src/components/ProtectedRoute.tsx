@@ -1,10 +1,9 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth, useProfile } from "../lib/auth";
+import { useAuth } from "../lib/auth";
 
 /**
  * Gate a route behind authentication. If not signed in, send to /login with
- * the original path in state so the callback can return there. If the user
- * hasn't completed onboarding, send to /onboarding first.
+ * the original path in state so the callback can return there.
  */
 export function ProtectedRoute({
   children,
@@ -13,29 +12,18 @@ export function ProtectedRoute({
   children: React.ReactNode;
   requireAdmin?: boolean;
 }) {
-  const { session, loading } = useAuth();
-  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { playerName, loading } = useAuth();
   const location = useLocation();
 
-  if (loading || profileLoading) return null;
+  if (loading) return null;
 
-  if (!session) {
+  if (!playerName) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  // Onboarding gate: a fresh profile gets display_name = email-local-part.
-  // Treat that as "not yet onboarded".
-  const emailLocal = session.user.email?.split("@")[0] ?? "";
-  const needsOnboarding =
-    !profile ||
-    profile.display_name === emailLocal ||
-    profile.display_name.trim() === "";
-
-  if (needsOnboarding && location.pathname !== "/onboarding") {
-    return <Navigate to="/onboarding" replace />;
-  }
-
-  if (requireAdmin && !profile?.is_admin) {
+  // For now, we don't have admin role tracking in localStorage.
+  // If you need admin checks, implement them separately.
+  if (requireAdmin) {
     return <Navigate to="/" replace />;
   }
 
