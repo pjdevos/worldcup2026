@@ -1,9 +1,8 @@
 import { Link, NavLink } from "react-router-dom";
-import { useAuth, useProfile } from "../lib/auth";
+import { useAuth } from "../lib/auth";
 
 export function AppNav() {
-  const { session, signOut } = useAuth();
-  const { data: profile } = useProfile();
+  const { playerName, signOut } = useAuth();
 
   return (
     <div
@@ -35,20 +34,21 @@ export function AppNav() {
         </Link>
         <NavItem to="/schedule" label="Schedule" />
         <NavItem to="/leaderboard" label="Leaderboard" />
-        {session && <NavItem to="/profile" label="My predictions" />}
-        {profile?.is_admin && <NavItem to="/admin" label="Admin" />}
+        {playerName && <NavItem to="/profile" label="My predictions" />}
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12 }}>
-        {session ? (
+        {playerName ? (
           <>
             <span style={{ opacity: 0.7 }}>
-              <span style={{ color: "var(--fari-mint)" }}>●</span>{" "}
-              {profile?.display_name ?? session.user.email}
+              <span style={{ color: "var(--fari-mint)" }}>●</span> {playerName}
             </span>
             <button
               type="button"
-              onClick={() => void signOut()}
+              onClick={() => {
+                signOut();
+                window.location.href = "/";
+              }}
               style={{
                 background: "transparent",
                 border: "1px solid var(--line-soft)",
