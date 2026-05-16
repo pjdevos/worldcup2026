@@ -172,11 +172,20 @@ export interface LeaderboardRow {
   user_id: string;
   display_name: string;
   team_name: string | null;
+  /** Total = match_points + bonus_points. */
   points: number;
+  /** Sum of per-match points. */
+  match_points: number;
+  /** Bonus awarded at tournament end (top scorer correct, etc). */
+  bonus_points: number;
+  /** Tournament-wide tiebreaker: predicted Belgium goal total. */
+  tiebreaker: number;
   scored: number;
 }
 
 export async function getLeaderboard(): Promise<LeaderboardRow[]> {
+  // Sort: total points desc, then tiebreaker proximity is applied client-side
+  // once we know the actual Belgium goal total (post-tournament admin step).
   const { data, error } = await supabase
     .from("leaderboard")
     .select("*")

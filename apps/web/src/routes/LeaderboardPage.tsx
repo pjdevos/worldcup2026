@@ -41,7 +41,8 @@ export function LeaderboardPage() {
               <Th style={{ width: 60 }}>#</Th>
               <Th>Name</Th>
               <Th>Team</Th>
-              <Th style={{ textAlign: "right", width: 100 }}>Scored</Th>
+              <Th style={{ textAlign: "right", width: 80 }}>Scored</Th>
+              <Th style={{ textAlign: "right", width: 80 }}>Bonus</Th>
               <Th style={{ textAlign: "right", width: 100 }}>Points</Th>
             </tr>
           </thead>
@@ -61,6 +62,17 @@ export function LeaderboardPage() {
                   <Td style={{ fontWeight: 700 }}>{row.display_name}</Td>
                   <Td style={{ opacity: 0.7 }}>{row.team_name ?? "—"}</Td>
                   <Td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace" }}>{row.scored}</Td>
+                  <Td
+                    style={{
+                      textAlign: "right",
+                      fontFamily: "JetBrains Mono, monospace",
+                      opacity: row.bonus_points > 0 ? 1 : 0.35,
+                      color: row.bonus_points > 0 ? "var(--fari-mint)" : undefined,
+                    }}
+                    title={row.bonus_points > 0 ? "Tournament bonus (top scorer, etc.)" : ""}
+                  >
+                    {row.bonus_points > 0 ? `+${row.bonus_points}` : "—"}
+                  </Td>
                   <Td
                     style={{
                       textAlign: "right",
@@ -101,9 +113,18 @@ function Th({ children, style }: { children: React.ReactNode; style?: React.CSSP
   );
 }
 
-function Td({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function Td({
+  children,
+  style,
+  title,
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  title?: string;
+}) {
   return (
     <td
+      title={title}
       style={{
         padding: "12px 14px",
         borderBottom: "1px solid var(--line-soft)",

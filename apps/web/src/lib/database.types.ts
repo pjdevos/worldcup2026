@@ -55,6 +55,7 @@ export interface DbProfile {
   created_at: string;
   tiebreaker_bel_goals: number | null;
   top_scorer: string | null;
+  bonus_points: number;
 }
 
 export interface DbPrediction {
