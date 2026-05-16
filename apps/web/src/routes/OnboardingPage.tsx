@@ -22,8 +22,6 @@ export function OnboardingPage() {
 
   useEffect(() => {
     if (profile && profile.display_name && profile.display_name !== "") {
-      // If they bookmarked /onboarding but already finished it — bounce.
-      // Heuristic: profile exists AND name isn't the email-local default.
       const emailLocal = session?.user.email?.split("@")[0] ?? "";
       const hasRealName =
         profile.display_name !== emailLocal && profile.display_name.length > 0;
@@ -56,34 +54,34 @@ export function OnboardingPage() {
   return (
     <div className="section" style={{ maxWidth: 520, margin: "60px auto" }}>
       <div className="section-head">
-        <h2>Welkom bij de FARI-pronostiek</h2>
+        <h2>Welcome to the FARI prediction pool</h2>
         <div className="hint">
-          Kies hoe je in het klassement verschijnt. Je kan dit later nog aanpassen.
+          Pick how you'd like to appear on the leaderboard. You can change this later.
         </div>
       </div>
 
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <Field
-          label="Weergavenaam"
+          label="Display name"
           required
-          hint="Wordt getoond op het leaderboard."
+          hint="Shown on the leaderboard."
         >
           <Input
             value={displayName}
             onChange={setDisplayName}
-            placeholder="Jouw naam"
+            placeholder="Your name"
             autoFocus
           />
         </Field>
 
         <Field
-          label="Team (optioneel)"
-          hint="Bv. 'Beleidsteam', 'AI Lab' — voor de FARI sub-team-rangschikking."
+          label="Team (optional)"
+          hint="e.g. 'Policy team', 'AI Lab' — for the FARI sub-team rankings."
         >
           <Input
             value={teamName}
             onChange={setTeamName}
-            placeholder="Geen team"
+            placeholder="No team"
           />
         </Field>
 
@@ -100,7 +98,7 @@ export function OnboardingPage() {
             opacity: saving ? 0.7 : 1,
           }}
         >
-          {saving ? "Opslaan…" : "Verder"}
+          {saving ? "Saving…" : "Continue"}
         </button>
       </form>
     </div>

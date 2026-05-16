@@ -5,19 +5,19 @@ export function Header() {
         <img
           className="fari-logo"
           src="/logo-voetbal.png"
-          alt="FARI — AI for the Common Good · Brussels (WK 2026 editie)"
+          alt="FARI — AI for the Common Good · Brussels (World Cup 2026 edition)"
         />
       </div>
       <div className="header-title">
-        <div className="eyebrow">Speelschema · 23ste FIFA Wereldbeker</div>
-        <h1>WK 2026</h1>
+        <div className="eyebrow">Schedule · 23rd FIFA World Cup</div>
+        <h1>World Cup 2026</h1>
       </div>
       <div className="header-meta">
-        <strong>11 juni → 19 juli 2026</strong>
-        <span>Canada · Mexico · VS</span>
-        <span>48 landen · 104 wedstrijden</span>
+        <strong>11 June → 19 July 2026</strong>
+        <span>Canada · Mexico · USA</span>
+        <span>48 nations · 104 matches</span>
         <span style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
-          Aftraptijden in Brussel (CEST)
+          Kickoff times in Brussels (CEST)
         </span>
       </div>
     </div>

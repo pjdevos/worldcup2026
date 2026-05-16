@@ -5,20 +5,20 @@ export function GroupsView() {
   return (
     <div className="section">
       <div className="section-head">
-        <h2>De twaalf poules</h2>
+        <h2>The twelve groups</h2>
         <div className="hint">
-          geselecteerd via de loting op 5 dec 2025 · Washington D.C.
+          drawn on 5 Dec 2025 · Washington D.C.
         </div>
       </div>
       <div className="legend">
         <span className="chip">
-          <span className="swatch host"></span> gastland (vooraf geplaatst)
+          <span className="swatch host"></span> host (seeded in advance)
         </span>
         <span className="chip">
-          <span className="swatch"></span> België
+          <span className="swatch"></span> Belgium
         </span>
         <span className="chip">
-          <span className="swatch placeholder"></span> de top-2 + 8 beste derdes plaatsen zich
+          <span className="swatch placeholder"></span> top 2 + 8 best thirds advance
         </span>
       </div>
       <div className="groups">

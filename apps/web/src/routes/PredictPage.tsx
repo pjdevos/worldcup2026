@@ -32,14 +32,14 @@ export function PredictPage() {
     enabled: Boolean(userId),
   });
 
-  if (isLoading) return <div className="section">Laden…</div>;
+  if (isLoading) return <div className="section">Loading…</div>;
   if (!match) {
     return (
       <div className="section">
         <div className="section-head">
-          <h2>Wedstrijd niet gevonden</h2>
+          <h2>Match not found</h2>
           <Link to="/schedule" className="hint">
-            ← terug naar het speelschema
+            ← back to the schedule
           </Link>
         </div>
       </div>
@@ -62,7 +62,6 @@ function PredictForm({
   const [away, setAway] = useState(existing?.away_score ?? 0);
   const [now, setNow] = useState(() => new Date());
 
-  // Refresh "now" every 30s so the lock state goes live without a reload.
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
@@ -76,7 +75,7 @@ function PredictForm({
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!session) throw new Error("Niet ingelogd");
+      if (!session) throw new Error("Not signed in");
       await upsertPrediction(session.user.id, match.id, home, away);
     },
     onSuccess: () => {
@@ -95,11 +94,11 @@ function PredictForm({
           className="hint"
           style={{ textDecoration: "none", color: "var(--fari-mint)" }}
         >
-          ← terug
+          ← back
         </Link>
-        <h2>Voorspel deze wedstrijd</h2>
+        <h2>Predict this match</h2>
         <div className="hint">
-          M{match.id} · {kick.full} (Brussel) · {match.stage === "group" ? `Groep ${match.group_id}` : match.stage.toUpperCase()}
+          M{match.id} · {kick.full} (Brussels) · {match.stage === "group" ? `Group ${match.group_id}` : match.stage.toUpperCase()}
         </div>
       </div>
 
@@ -111,19 +110,19 @@ function PredictForm({
 
       {cantPredict && (
         <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 16 }}>
-          ⚠ Deze knock-out match heeft nog geen vaste deelnemers — voorspellingen kunnen pas
-          ingevuld worden zodra de poulestand vastligt.
+          ⚠ This knockout match doesn't have its teams fixed yet — predictions
+          will open as soon as the group standings are final.
         </div>
       )}
 
       {finished && (
         <div style={{ fontSize: 13, marginBottom: 16, opacity: 0.85 }}>
-          ⚑ Eindstand: <b>{match.home_score}–{match.away_score}</b>.
+          ⚑ Final score: <b>{match.home_score}–{match.away_score}</b>.
           {existing && (
             <>
-              {" "}Jouw voorspelling: <b>{existing.home_score}–{existing.away_score}</b>
+              {" "}Your prediction: <b>{existing.home_score}–{existing.away_score}</b>
               {existing.points !== null && (
-                <> · <span style={{ color: "var(--fari-mint)" }}>{existing.points} punt{existing.points === 1 ? "" : "en"}</span></>
+                <> · <span style={{ color: "var(--fari-mint)" }}>{existing.points} point{existing.points === 1 ? "" : "s"}</span></>
               )}
             </>
           )}
@@ -132,17 +131,17 @@ function PredictForm({
 
       {!finished && locked && (
         <div style={{ fontSize: 13, marginBottom: 16, opacity: 0.85 }}>
-          🔒 Voorspellingen voor deze wedstrijd zijn gesloten.
+          🔒 Predictions for this match are closed.
           {existing
-            ? <> Jouw inzet: <b>{existing.home_score}–{existing.away_score}</b>.</>
-            : <> Je hebt geen voorspelling ingevuld (telt als 0–0).</>}
+            ? <> Your pick: <b>{existing.home_score}–{existing.away_score}</b>.</>
+            : <> You didn't submit a prediction (counted as 0–0).</>}
         </div>
       )}
 
       {!finished && !locked && !cantPredict && (
         <>
           <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.6, marginBottom: 10 }}>
-            Slot dicht: {Math.max(0, Math.round((new Date(match.kick_at).getTime() - now.getTime() - 5 * 60 * 1000) / 60_000))} min
+            Locks in: {Math.max(0, Math.round((new Date(match.kick_at).getTime() - now.getTime() - 5 * 60 * 1000) / 60_000))} min
           </div>
           <button
             type="button"
@@ -152,10 +151,10 @@ function PredictForm({
             style={{ padding: "10px 24px", cursor: save.isPending ? "wait" : "pointer", opacity: save.isPending ? 0.7 : 1 }}
           >
             {save.isPending
-              ? "Opslaan…"
+              ? "Saving…"
               : existing
-              ? "Voorspelling bijwerken"
-              : "Voorspelling opslaan"}
+              ? "Update prediction"
+              : "Save prediction"}
           </button>
           {save.isError && (
             <div style={{ color: "#ff8a8a", fontSize: 12, marginTop: 8 }}>
@@ -164,7 +163,7 @@ function PredictForm({
           )}
           {save.isSuccess && (
             <div style={{ color: "var(--fari-mint-bright)", fontSize: 12, marginTop: 8 }}>
-              Opgeslagen.
+              Saved.
             </div>
           )}
         </>
@@ -231,7 +230,7 @@ function Stepper({ value, onChange }: { value: number; onChange: (v: number) => 
         type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
         style={stepperBtn}
-        aria-label="minder"
+        aria-label="decrease"
       >
         −
       </button>
@@ -250,7 +249,7 @@ function Stepper({ value, onChange }: { value: number; onChange: (v: number) => 
         type="button"
         onClick={() => onChange(Math.min(30, value + 1))}
         style={stepperBtn}
-        aria-label="meer"
+        aria-label="increase"
       >
         +
       </button>

@@ -59,14 +59,14 @@ export function BracketView() {
   return (
     <div className="section">
       <div className="section-head">
-        <h2>Knock-outfase</h2>
-        <div className="hint">32 teams · 32 wedstrijden · één maand · één winnaar</div>
+        <h2>Knockout stage</h2>
+        <div className="hint">32 teams · 32 matches · one month · one winner</div>
       </div>
       <div className="bracket-scroll">
         <div className="bracket">
           <div className="round-col">
             <h3>
-              1/16 · <b>Achtste van 32</b>
+              1/16 · <b>Round of 32</b>
             </h3>
             <div className="ties">
               {R32.map((t) => (
@@ -76,7 +76,7 @@ export function BracketView() {
           </div>
           <div className="round-col">
             <h3>
-              1/8 · <b>Achtste finale</b>
+              1/8 · <b>Round of 16</b>
             </h3>
             <div className="ties">
               {R16.map((t) => (
@@ -86,7 +86,7 @@ export function BracketView() {
           </div>
           <div className="round-col">
             <h3>
-              1/4 · <b>Kwartfinale</b>
+              1/4 · <b>Quarter-finals</b>
             </h3>
             <div className="ties">
               {QF.map((t) => (
@@ -96,7 +96,7 @@ export function BracketView() {
           </div>
           <div className="round-col">
             <h3>
-              1/2 · <b>Halve finale</b>
+              1/2 · <b>Semi-finals</b>
             </h3>
             <div className="ties">
               {SF.map((t) => (
@@ -106,7 +106,7 @@ export function BracketView() {
           </div>
           <div className="round-col">
             <h3>
-              <b>Plek 3/4</b>
+              <b>3rd place</b>
             </h3>
             <div className="ties">
               <Tie tie={THIRD_PLACE} />
@@ -114,7 +114,7 @@ export function BracketView() {
           </div>
           <div className="round-col">
             <h3 style={{ color: "var(--fari-mint)" }}>
-              <b>FINALE</b>
+              <b>FINAL</b>
             </h3>
             <div className="ties">
               <Tie tie={FINAL} isFinal />
@@ -124,8 +124,8 @@ export function BracketView() {
       </div>
 
       <div className="section-head" style={{ marginTop: 36 }}>
-        <h2 style={{ fontSize: 18 }}>16 gaststeden</h2>
-        <div className="hint">11 in de VS · 3 in Mexico · 2 in Canada</div>
+        <h2 style={{ fontSize: 18 }}>16 host cities</h2>
+        <div className="hint">11 in the US · 3 in Mexico · 2 in Canada</div>
       </div>
       <div className="venues">
         {VENUES.map((v) => (
@@ -144,7 +144,7 @@ export function BracketView() {
             </div>
             <div className="name">{v.name}</div>
             <div className="cap">
-              capaciteit · <b>{v.cap.toLocaleString("nl-BE")}</b>
+              capacity · <b>{v.cap.toLocaleString("en-GB")}</b>
             </div>
           </div>
         ))}

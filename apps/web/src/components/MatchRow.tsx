@@ -3,7 +3,7 @@ import { TEAMS } from "../data/wk";
 import type { DbPrediction } from "../lib/database.types";
 import { parsePlaceholder } from "../lib/format";
 
-export type StageLabel = "groep" | "R32" | "R16" | "KF" | "HF" | "3/4" | "FINALE";
+export type StageLabel = "group" | "R32" | "R16" | "QF" | "SF" | "3/4" | "FINAL";
 
 export interface MatchRowData {
   /** DB match id (1-104). Required for inline prediction saves. */
@@ -43,7 +43,7 @@ function Team({
   const t = TEAMS[id];
   const dot = withWinnerDot ? (
     <span
-      title="Jouw voorspelde winnaar"
+      title="Your predicted winner"
       style={{
         display: "inline-block",
         width: 12,
@@ -70,7 +70,7 @@ function Team({
               className="code"
               style={{ color: "var(--fari-mint)", fontWeight: 700 }}
             >
-              GASTLAND
+              HOST
             </div>
           )}
         </span>
@@ -240,7 +240,7 @@ export function MatchRow({
       </div>
       <div className="grp-cell">
         {match.group && <span className="grp-pill">{match.group}</span>}
-        {match.stage && match.stage !== "groep" && (
+        {match.stage && match.stage !== "group" && (
           <span className="grp-pill stage">{match.stage}</span>
         )}
       </div>

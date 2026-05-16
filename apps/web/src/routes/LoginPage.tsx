@@ -33,9 +33,9 @@ export function LoginPage() {
   return (
     <div className="section" style={{ maxWidth: 460, margin: "60px auto" }}>
       <div className="section-head">
-        <h2>Inloggen</h2>
+        <h2>Sign in</h2>
         <div className="hint">
-          We sturen je een magische link per e-mail — geen wachtwoord nodig.
+          We'll email you a magic link — no password needed.
         </div>
       </div>
 
@@ -49,10 +49,10 @@ export function LoginPage() {
             padding: 20,
           }}
         >
-          <strong style={{ color: "var(--fari-mint-bright)" }}>Mail verstuurd.</strong>
+          <strong style={{ color: "var(--fari-mint-bright)" }}>Email sent.</strong>
           <p style={{ margin: "6px 0 0", fontSize: 13, opacity: 0.85 }}>
-            Klik op de link in je inbox ({email}) om in te loggen. Niets ontvangen?
-            Check je spam-folder of probeer opnieuw.
+            Click the link in your inbox ({email}) to sign in. Nothing received?
+            Check your spam folder or try again.
           </p>
         </div>
       ) : (
@@ -70,14 +70,14 @@ export function LoginPage() {
               opacity: 0.7,
             }}
           >
-            E-mailadres
+            Email address
           </label>
           <input
             id="email"
             type="email"
             required
             autoFocus
-            placeholder="jij@fari.brussels"
+            placeholder="you@fari.brussels"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={{
@@ -104,7 +104,7 @@ export function LoginPage() {
               opacity: status === "sending" ? 0.7 : 1,
             }}
           >
-            {status === "sending" ? "Versturen…" : "Stuur magische link"}
+            {status === "sending" ? "Sending…" : "Send magic link"}
           </button>
         </form>
       )}

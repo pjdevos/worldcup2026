@@ -36,16 +36,16 @@ export function AdminPage() {
 
       <div className="section">
         <div className="section-head">
-          <h2>Admin · Resultaten invoeren</h2>
+          <h2>Admin · Enter results</h2>
           <div className="hint">
-            Vul de eindstand in om punten te berekenen. Re-runnen overschrijft eerdere punten.
+            Enter the final score to compute points. Re-running overwrites previous points.
           </div>
         </div>
 
-        {matchesQ.isLoading && <div className="hint">Laden…</div>}
+        {matchesQ.isLoading && <div className="hint">Loading…</div>}
 
         {pending.length === 0 && !matchesQ.isLoading && (
-          <div className="hint">Geen openstaande wedstrijden.</div>
+          <div className="hint">No pending matches.</div>
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -70,7 +70,7 @@ function AdminMatchRow({ match }: { match: DbMatch }) {
       const h = Number(home);
       const a = Number(away);
       if (!Number.isInteger(h) || !Number.isInteger(a) || h < 0 || a < 0) {
-        throw new Error("Vul beide scores in (geheel getal ≥ 0).");
+        throw new Error("Enter both scores (whole numbers ≥ 0).");
       }
       return setMatchResultAndScore(match.id, h, a);
     },
@@ -102,8 +102,8 @@ function AdminMatchRow({ match }: { match: DbMatch }) {
           {nameOf(match.home_team, match.home_slot)} — {nameOf(match.away_team, match.away_slot)}
         </span>
         <span style={{ fontSize: 10, opacity: 0.6, marginTop: 2 }}>
-          M{match.id} · {match.stage === "group" ? `Groep ${match.group_id}` : match.stage.toUpperCase()}
-          {overdue && <span style={{ color: "var(--fari-mint)", marginLeft: 8 }}>● gespeeld?</span>}
+          M{match.id} · {match.stage === "group" ? `Group ${match.group_id}` : match.stage.toUpperCase()}
+          {overdue && <span style={{ color: "var(--fari-mint)", marginLeft: 8 }}>● played?</span>}
         </span>
       </div>
       <ScoreInput value={home} onChange={setHome} />
@@ -124,10 +124,10 @@ function AdminMatchRow({ match }: { match: DbMatch }) {
           }}
         >
           {save.isPending
-            ? "Bezig…"
+            ? "Working…"
             : save.isSuccess
-            ? `+${save.data ?? ""} gescoord`
-            : "Score & bereken"}
+            ? `+${save.data ?? ""} scored`
+            : "Score & compute"}
         </button>
         {save.isError && (
           <div style={{ color: "#ff8a8a", fontSize: 10, marginTop: 4 }}>
@@ -201,8 +201,8 @@ function ScoringRulesEditor() {
   return (
     <div className="section">
       <div className="section-head">
-        <h2 style={{ fontSize: 18 }}>Puntenregels</h2>
-        <div className="hint">Wijzigingen gelden vanaf de volgende scoring-run.</div>
+        <h2 style={{ fontSize: 18 }}>Scoring rules</h2>
+        <div className="hint">Changes apply from the next scoring run onwards.</div>
       </div>
       <div
         style={{
@@ -250,7 +250,7 @@ function ScoringRulesEditor() {
         className="tab is-active"
         style={{ marginTop: 12, padding: "8px 18px", cursor: save.isPending ? "wait" : "pointer" }}
       >
-        {save.isPending ? "Opslaan…" : save.isSuccess ? "Opgeslagen" : "Regels opslaan"}
+        {save.isPending ? "Saving…" : save.isSuccess ? "Saved" : "Save rules"}
       </button>
       {save.isError && (
         <div style={{ color: "#ff8a8a", fontSize: 12, marginTop: 8 }}>
@@ -288,18 +288,18 @@ function CronStatusPanel() {
   });
 
   const lastRun = data?.lastRun;
-  const lastRunRel = lastRun ? relTime(new Date(lastRun.ran_at)) : "nog niet gelopen";
+  const lastRunRel = lastRun ? relTime(new Date(lastRun.ran_at)) : "not yet run";
 
   return (
     <div className="section">
       <div className="section-head">
         <h2 style={{ fontSize: 18 }}>Auto-fetch · football-data.org</h2>
         <div className="hint">
-          De cron draait elk uur en haalt eindstanden binnen. Manueel triggeren kan met de knop hieronder.
+          The cron runs hourly and pulls in final scores. Trigger it manually with the button below.
         </div>
       </div>
 
-      {isLoading && <div className="hint">Laden…</div>}
+      {isLoading && <div className="hint">Loading…</div>}
 
       {data && (
         <div
@@ -314,14 +314,14 @@ function CronStatusPanel() {
             padding: 16,
           }}
         >
-          <Stat label="Laatste run" value={lastRunRel}>
+          <Stat label="Last run" value={lastRunRel}>
             {lastRun && (
               <span style={{ fontSize: 11, opacity: 0.6 }}>
                 checked: {lastRun.checked} · updated: {lastRun.updated} · errors: {lastRun.errors}
               </span>
             )}
           </Stat>
-          <Stat label="Vandaag automatisch" value={`${data.autoUpdatedToday} match${data.autoUpdatedToday === 1 ? "" : "es"}`} />
+          <Stat label="Auto-updated today" value={`${data.autoUpdatedToday} match${data.autoUpdatedToday === 1 ? "" : "es"}`} />
           <button
             type="button"
             onClick={() => fetchNow.mutate()}
@@ -334,7 +334,7 @@ function CronStatusPanel() {
               whiteSpace: "nowrap",
             }}
           >
-            {fetchNow.isPending ? "Bezig…" : "Fetch now"}
+            {fetchNow.isPending ? "Working…" : "Fetch now"}
           </button>
         </div>
       )}
@@ -371,12 +371,12 @@ function CronStatusPanel() {
               opacity: 0.7,
             }}
           >
-            Recente runs ({data.recent.length})
+            Recent runs ({data.recent.length})
           </summary>
           <table style={{ width: "100%", marginTop: 8, borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
               <tr>
-                <TableHead>Tijd</TableHead>
+                <TableHead>Time</TableHead>
                 <TableHead style={{ textAlign: "right" }}>Checked</TableHead>
                 <TableHead style={{ textAlign: "right" }}>Updated</TableHead>
                 <TableHead style={{ textAlign: "right" }}>Errors</TableHead>
@@ -398,7 +398,7 @@ function LogRow({ log }: { log: DbCronLog }) {
   return (
     <tr>
       <TableCell style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 11 }}>
-        {new Date(log.ran_at).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" })}
+        {new Date(log.ran_at).toLocaleString("en-GB", { timeZone: "Europe/Brussels" })}
       </TableCell>
       <TableCell style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace" }}>{log.checked}</TableCell>
       <TableCell style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace" }}>{log.updated}</TableCell>
@@ -464,8 +464,8 @@ function TableCell({ children, style }: { children: React.ReactNode; style?: Rea
 
 function relTime(d: Date): string {
   const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
-  if (diffSec < 60) return "net";
-  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} min geleden`;
-  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} u geleden`;
-  return d.toLocaleDateString("nl-BE", { day: "numeric", month: "short", timeZone: "Europe/Brussels" });
+  if (diffSec < 60) return "just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} min ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} h ago`;
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Europe/Brussels" });
 }

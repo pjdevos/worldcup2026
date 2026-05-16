@@ -31,11 +31,11 @@ export function AppNav() {
             opacity: 0.7,
           }}
         >
-          ▸ Pronostiek
+          ▸ Predictions
         </Link>
-        <NavItem to="/schedule" label="Speelschema" />
-        <NavItem to="/leaderboard" label="Klassement" />
-        {session && <NavItem to="/profile" label="Mijn pronostieken" />}
+        <NavItem to="/schedule" label="Schedule" />
+        <NavItem to="/leaderboard" label="Leaderboard" />
+        {session && <NavItem to="/profile" label="My predictions" />}
         {profile?.is_admin && <NavItem to="/admin" label="Admin" />}
       </nav>
 
@@ -59,7 +59,7 @@ export function AppNav() {
                 fontSize: 12,
               }}
             >
-              Uitloggen
+              Sign out
             </button>
           </>
         ) : (
@@ -68,7 +68,7 @@ export function AppNav() {
             className="tab is-active"
             style={{ padding: "7px 16px", textDecoration: "none", fontSize: 12 }}
           >
-            Inloggen
+            Sign in
           </Link>
         )}
       </div>

@@ -30,13 +30,13 @@ export function formatKickoff(kickAtIso: string): {
   full: string;
 } {
   const d = new Date(kickAtIso);
-  const date = d.toLocaleDateString("nl-BE", {
+  const date = d.toLocaleDateString("en-GB", {
     weekday: "short",
     day: "numeric",
     month: "short",
     timeZone: "Europe/Brussels",
   });
-  const time = d.toLocaleTimeString("nl-BE", {
+  const time = d.toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: "Europe/Brussels",

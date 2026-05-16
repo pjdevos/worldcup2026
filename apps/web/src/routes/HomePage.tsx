@@ -37,7 +37,7 @@ function Hero({ session }: { session: boolean }) {
             textTransform: "uppercase",
           }}
         >
-          23ste FIFA Wereldbeker · pronostiek
+          23rd FIFA World Cup · Prediction pool
         </div>
 
         <h1
@@ -49,7 +49,7 @@ function Hero({ session }: { session: boolean }) {
             lineHeight: 0.92,
           }}
         >
-          WK 2026
+          World Cup 2026
         </h1>
 
         <div
@@ -63,11 +63,11 @@ function Hero({ session }: { session: boolean }) {
           }}
         >
           <strong style={{ color: "white", fontSize: 17, fontWeight: 700 }}>
-            11 juni → 19 juli 2026
+            11 June → 19 July 2026
           </strong>
-          <span>Canada · Mexico · Verenigde Staten</span>
+          <span>Canada · Mexico · United States</span>
           <span style={{ opacity: 0.75 }}>
-            48 landen · 104 wedstrijden · 5 weken voetbal
+            48 nations · 104 matches · 5 weeks of football
           </span>
         </div>
 
@@ -80,8 +80,8 @@ function Hero({ session }: { session: boolean }) {
             maxWidth: 500,
           }}
         >
-          Voorspel elke wedstrijd, vul je knock-out bracket in en strijd met je
-          FARI-collega's om de eerste plaats in het klassement.
+          Predict every match, fill in your knockout bracket and compete with
+          your FARI colleagues for first place on the leaderboard.
         </p>
 
         <div
@@ -93,14 +93,14 @@ function Hero({ session }: { session: boolean }) {
           }}
         >
           <Link to="/schedule" style={ctaPrimary}>
-            Naar speelschema
+            View schedule
             <Arrow />
           </Link>
           <Link
             to={session ? "/profile" : "/login"}
             style={ctaSecondary}
           >
-            {session ? "Mijn pronostieken" : "Inloggen om te beginnen"}
+            {session ? "My predictions" : "Sign in to get started"}
             <Arrow />
           </Link>
         </div>
@@ -127,7 +127,7 @@ function Hero({ session }: { session: boolean }) {
         />
         <img
           src="/fari-world-cup-2026.png"
-          alt="WK 2026 — FARI pronostiek"
+          alt="World Cup 2026 — FARI prediction pool"
           style={{
             position: "relative",
             maxHeight: 480,
@@ -154,25 +154,25 @@ function FactsStrip() {
       }}
     >
       <Fact
-        k="Openingsmatch"
-        v="Mexico — Zuid-Afrika"
-        sub="do 11 juni · Estadio Banorte, Mexico-Stad"
+        k="Opening match"
+        v="Mexico — South Africa"
+        sub="Thu 11 Jun · Estadio Banorte, Mexico City"
         first
       />
       <Fact
-        k="België · Groep G"
+        k="Belgium · Group G"
         v="EGY · IRN · NZL"
-        sub="eerste match: ma 15 juni · Miami"
+        sub="first match: Mon 15 Jun · Miami"
       />
       <Fact
-        k="Finale"
-        v="zo 19 juli · 21:00"
+        k="Final"
+        v="Sun 19 Jul · 21:00"
         sub="MetLife Stadium, New York / New Jersey"
       />
       <Fact
         k="Format"
-        v="12 groepen · R32"
-        sub="top 2 per groep + 8 beste derdes"
+        v="12 groups · R32"
+        sub="top 2 per group + 8 best thirds"
       />
     </section>
   );
@@ -264,9 +264,9 @@ function BrandStrip() {
           lineHeight: 1.6,
         }}
       >
-        Een interne pronostiek
+        An internal prediction pool
         <br />
-        van het FARI-team
+        by the FARI team
       </div>
     </section>
   );

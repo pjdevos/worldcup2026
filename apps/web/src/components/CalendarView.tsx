@@ -44,19 +44,19 @@ function groupToRow(m: GroupMatch, idx: number): AnyMatch {
     home: m.home,
     away: m.away,
     venue: m.venue,
-    stage: "groep",
+    stage: "group",
     group: m.group,
   };
 }
 
 function stageOf(date: string): string {
-  if (date <= "2026-06-27") return "Groepsfase";
-  if (date <= "2026-07-04") return "Achtste van 32";
-  if (date <= "2026-07-07") return "Achtste finale";
-  if (date <= "2026-07-11") return "Kwartfinale";
-  if (date <= "2026-07-15") return "Halve finale";
-  if (date <= "2026-07-18") return "Plek 3/4";
-  return "Finale";
+  if (date <= "2026-06-27") return "Group stage";
+  if (date <= "2026-07-04") return "Round of 32";
+  if (date <= "2026-07-07") return "Round of 16";
+  if (date <= "2026-07-11") return "Quarter-finals";
+  if (date <= "2026-07-15") return "Semi-finals";
+  if (date <= "2026-07-18") return "3rd place";
+  return "Final";
 }
 
 /** Construct the UTC instant for a Brussels-local date+time. */
@@ -83,10 +83,10 @@ export function CalendarView() {
       ...GROUP_STAGE.map((m, i) => groupToRow(m, i)),
       ...R32.map((t) => tieToRow(t, "R32")),
       ...R16.map((t) => tieToRow(t, "R16")),
-      ...QF.map((t) => tieToRow(t, "KF")),
-      ...SF.map((t) => tieToRow(t, "HF")),
+      ...QF.map((t) => tieToRow(t, "QF")),
+      ...SF.map((t) => tieToRow(t, "SF")),
       tieToRow(THIRD_PLACE, "3/4"),
-      tieToRow(FINAL, "FINALE"),
+      tieToRow(FINAL, "FINAL"),
     ];
   }, []);
 
@@ -164,12 +164,12 @@ export function CalendarView() {
   return (
     <div className="section">
       <div className="section-head">
-        <h2>Volledige speelkalender</h2>
+        <h2>Full schedule</h2>
         <div className="hint">
-          {days.length} speeldagen · 104 wedstrijden · alle aftraptijden in Brusselse tijd
+          {days.length} match days · 104 matches · all kickoff times in Brussels time
           {userId
-            ? " · klik op +/− om je voorspelling op te slaan"
-            : " · log in om voorspellingen in te vullen"}
+            ? " · click +/− to save your prediction"
+            : " · sign in to enter your predictions"}
         </div>
       </div>
       <div className="calendar">

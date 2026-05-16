@@ -1,9 +1,9 @@
 export type ScheduleTab = "groups" | "calendar" | "bracket";
 
 const ITEMS: Array<{ id: ScheduleTab; label: string }> = [
-  { id: "groups", label: "Poules" },
-  { id: "calendar", label: "Speelkalender" },
-  { id: "bracket", label: "Knock-out" },
+  { id: "groups", label: "Groups" },
+  { id: "calendar", label: "Calendar" },
+  { id: "bracket", label: "Knockout" },
 ];
 
 export function Tabs({

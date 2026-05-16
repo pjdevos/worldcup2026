@@ -14,17 +14,17 @@ export function LeaderboardPage() {
   return (
     <div className="section">
       <div className="section-head">
-        <h2>Klassement</h2>
+        <h2>Leaderboard</h2>
         <div className="hint">
-          Totaalpunten over alle gespeelde wedstrijden. Bijgewerkt zodra een wedstrijd afgelopen is.
+          Total points across all played matches. Updates as soon as a match is finalised.
         </div>
       </div>
 
-      {isLoading && <div className="hint">Laden…</div>}
+      {isLoading && <div className="hint">Loading…</div>}
 
       {data && data.length === 0 && (
         <div className="hint">
-          Nog niemand op het bord — voeg jouw voorspellingen toe vanaf 11 juni!
+          Nobody on the board yet — add your predictions starting 11 June!
         </div>
       )}
 
@@ -39,10 +39,10 @@ export function LeaderboardPage() {
           <thead>
             <tr style={{ textAlign: "left" }}>
               <Th style={{ width: 60 }}>#</Th>
-              <Th>Naam</Th>
+              <Th>Name</Th>
               <Th>Team</Th>
-              <Th style={{ textAlign: "right", width: 100 }}>Gespeeld</Th>
-              <Th style={{ textAlign: "right", width: 100 }}>Punten</Th>
+              <Th style={{ textAlign: "right", width: 100 }}>Scored</Th>
+              <Th style={{ textAlign: "right", width: 100 }}>Points</Th>
             </tr>
           </thead>
           <tbody>

@@ -5,7 +5,7 @@ export function GroupCard({ group }: { group: Group }) {
     <div className="group" data-group={group.id}>
       <div className="group-head">
         <div className="group-letter">
-          Groep <b>{group.id}</b>
+          Group <b>{group.id}</b>
         </div>
         <div className="group-cohort">{group.teams[0]}</div>
       </div>
@@ -22,7 +22,7 @@ export function GroupCard({ group }: { group: Group }) {
               <span className="code-badge">{t.code}</span>
               <span className="country">
                 {t.name}
-                {t.host && <span className="host-badge">GASTLAND</span>}
+                {t.host && <span className="host-badge">HOST</span>}
               </span>
             </li>
           );

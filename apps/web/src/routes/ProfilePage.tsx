@@ -35,10 +35,10 @@ export function ProfilePage() {
           <h2>{profile?.display_name ?? session?.user.email}</h2>
           <div className="hint">
             {profile?.team_name ? `Team: ${profile.team_name} · ` : ""}
-            {predictions.length} voorspelling{predictions.length === 1 ? "" : "en"}
-            {scoredCount > 0 && ` · ${scoredCount} gespeeld · `}
+            {predictions.length} prediction{predictions.length === 1 ? "" : "s"}
+            {scoredCount > 0 && ` · ${scoredCount} scored · `}
             {scoredCount > 0 && (
-              <b style={{ color: "var(--fari-mint)" }}>{totalPoints} punt{totalPoints === 1 ? "" : "en"}</b>
+              <b style={{ color: "var(--fari-mint)" }}>{totalPoints} point{totalPoints === 1 ? "" : "s"}</b>
             )}
           </div>
         </div>
@@ -46,15 +46,15 @@ export function ProfilePage() {
 
       <div className="section">
         <div className="section-head">
-          <h2 style={{ fontSize: 18 }}>Mijn voorspellingen</h2>
+          <h2 style={{ fontSize: 18 }}>My predictions</h2>
         </div>
         {predictionsQ.isLoading || matchesQ.isLoading ? (
-          <div className="hint">Laden…</div>
+          <div className="hint">Loading…</div>
         ) : predictions.length === 0 ? (
           <div className="hint">
-            Je hebt nog geen voorspellingen.{" "}
+            You haven't made any predictions yet.{" "}
             <Link to="/schedule" style={{ color: "var(--fari-mint)" }}>
-              Naar het speelschema →
+              Go to the schedule →
             </Link>
           </div>
         ) : (
@@ -96,7 +96,7 @@ function PredictionRow({ pred, match }: { pred: DbPrediction; match: DbMatch }) 
           {nameOf(match.home_team, match.home_slot)} — {nameOf(match.away_team, match.away_slot)}
         </span>
         <span style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>
-          M{match.id} · {match.stage === "group" ? `Groep ${match.group_id}` : match.stage.toUpperCase()}
+          M{match.id} · {match.stage === "group" ? `Group ${match.group_id}` : match.stage.toUpperCase()}
         </span>
       </div>
       <div
@@ -110,12 +110,12 @@ function PredictionRow({ pred, match }: { pred: DbPrediction; match: DbMatch }) 
         {pred.home_score}–{pred.away_score}
         {!locked && (
           <div style={{ fontSize: 9, opacity: 0.6, marginTop: 2, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            wijzigbaar
+            editable
           </div>
         )}
         {locked && !finished && (
           <div style={{ fontSize: 9, opacity: 0.6, marginTop: 2, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            🔒 vergrendeld
+            🔒 locked
           </div>
         )}
       </div>
@@ -133,7 +133,7 @@ function PredictionRow({ pred, match }: { pred: DbPrediction; match: DbMatch }) 
           </>
         ) : (
           <span style={{ fontSize: 10, opacity: 0.5, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            te spelen
+            upcoming
           </span>
         )}
       </div>
