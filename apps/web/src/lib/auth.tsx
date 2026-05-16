@@ -1,5 +1,4 @@
-import type { Session } from "@supabase/supabase-js";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useContext,
@@ -8,52 +7,40 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { DbProfile } from "./database.types";
-import { getProfile } from "./queries";
-import { supabase } from "./supabase";
 
 interface AuthCtx {
-  session: Session | null;
+  playerName: string | null;
   loading: boolean;
-  signOut: () => Promise<void>;
+  signOut: () => void;
 }
 
 const Ctx = createContext<AuthCtx | null>(null);
 
+const PLAYER_NAME_KEY = "worldcup_player_name";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [playerName, setPlayerName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const qc = useQueryClient();
 
   useEffect(() => {
-    let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setSession(data.session);
-      setLoading(false);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
-      qc.invalidateQueries({ queryKey: ["profile"] });
-    });
-
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, [qc]);
+    // Load player name from localStorage on mount
+    const saved = localStorage.getItem(PLAYER_NAME_KEY);
+    setPlayerName(saved);
+    setLoading(false);
+  }, []);
 
   const value = useMemo<AuthCtx>(
     () => ({
-      session,
+      playerName,
       loading,
-      signOut: async () => {
-        await supabase.auth.signOut();
+      signOut: () => {
+        localStorage.removeItem(PLAYER_NAME_KEY);
+        setPlayerName(null);
         qc.clear();
       },
     }),
-    [session, loading, qc],
+    [playerName, loading, qc],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -63,15 +50,4 @@ export function useAuth(): AuthCtx {
   const v = useContext(Ctx);
   if (!v) throw new Error("useAuth must be used inside <AuthProvider>");
   return v;
-}
-
-export function useProfile() {
-  const { session } = useAuth();
-  const userId = session?.user.id;
-
-  return useQuery<DbProfile | null>({
-    queryKey: ["profile", userId ?? "anon"],
-    enabled: Boolean(userId),
-    queryFn: () => (userId ? getProfile(userId) : Promise.resolve(null)),
-  });
 }
