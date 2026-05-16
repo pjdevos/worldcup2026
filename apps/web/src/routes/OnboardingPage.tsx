@@ -1,54 +1,40 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth, useProfile } from "../lib/auth";
-import { updateProfile } from "../lib/queries";
+import { useAuth } from "../lib/auth";
 
 export function OnboardingPage() {
-  const { session, loading: authLoading } = useAuth();
-  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { playerName, loading } = useAuth();
   const navigate = useNavigate();
-  const qc = useQueryClient();
 
-  const defaultName =
-    profile?.display_name ??
-    session?.user.email?.split("@")[0] ??
-    "";
-
-  const [displayName, setDisplayName] = useState(defaultName);
-  const [teamName, setTeamName] = useState(profile?.team_name ?? "");
+  const [displayName, setDisplayName] = useState(playerName || "");
+  const [teamName, setTeamName] = useState("");
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (profile && profile.display_name && profile.display_name !== "") {
-      const emailLocal = session?.user.email?.split("@")[0] ?? "";
-      const hasRealName =
-        profile.display_name !== emailLocal && profile.display_name.length > 0;
-      if (hasRealName) navigate("/", { replace: true });
-    }
-  }, [profile, session, navigate]);
+  if (loading) return null;
+  if (!playerName) return <Navigate to="/login" replace />;
 
-  if (authLoading || profileLoading) return null;
-  if (!session) return <Navigate to="/login" replace />;
+  // If player already has a name (not just the default), skip onboarding
+  if (playerName && playerName.trim()) {
+    navigate("/", { replace: true });
+    return null;
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!session) return;
+    if (!displayName.trim()) return;
+
     setSaving(true);
-    setError(null);
-    try {
-      await updateProfile(session.user.id, {
-        display_name: displayName.trim(),
-        team_name: teamName.trim() || null,
-      });
-      await qc.invalidateQueries({ queryKey: ["profile"] });
-      navigate("/", { replace: true });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSaving(false);
-    }
+
+    // Simulate a small delay
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // Update the player name in localStorage
+    localStorage.setItem("worldcup_player_name", displayName.trim());
+
+    setSaving(false);
+
+    // Reload to pick up the updated name
+    window.location.href = "/";
   }
 
   return (
@@ -56,7 +42,7 @@ export function OnboardingPage() {
       <div className="section-head">
         <h2>Welcome to the FARI prediction pool</h2>
         <div className="hint">
-          Pick how you'd like to appear on the leaderboard. You can change this later.
+          Pick how you'd like to appear on the leaderboard.
         </div>
       </div>
 
@@ -73,19 +59,6 @@ export function OnboardingPage() {
             autoFocus
           />
         </Field>
-
-        <Field
-          label="Team (optional)"
-          hint="e.g. 'Policy team', 'AI Lab' — for the FARI sub-team rankings."
-        >
-          <Input
-            value={teamName}
-            onChange={setTeamName}
-            placeholder="No team"
-          />
-        </Field>
-
-        {error && <div style={{ color: "#ff8a8a", fontSize: 12 }}>{error}</div>}
 
         <button
           type="submit"
