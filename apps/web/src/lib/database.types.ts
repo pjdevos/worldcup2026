@@ -53,6 +53,8 @@ export interface DbProfile {
   team_name: string | null;
   is_admin: boolean;
   created_at: string;
+  tiebreaker_bel_goals: number | null;
+  top_scorer: string | null;
 }
 
 export interface DbPrediction {

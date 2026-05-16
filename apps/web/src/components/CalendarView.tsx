@@ -17,6 +17,7 @@ import { useAuth } from "../lib/auth";
 import type { DbPrediction } from "../lib/database.types";
 import { listMyPredictions, upsertPrediction } from "../lib/queries";
 import { MatchRow, type MatchRowData, type StageLabel } from "./MatchRow";
+import { TournamentPicks } from "./TournamentPicks";
 
 interface AnyMatch extends MatchRowData {
   date: string;
@@ -172,6 +173,8 @@ export function CalendarView() {
             : " · sign in to enter your predictions"}
         </div>
       </div>
+
+      {userId && <TournamentPicks />}
       <div className="calendar">
         <div className="cal-sidebar">
           {grouped.map((blk, i) => (

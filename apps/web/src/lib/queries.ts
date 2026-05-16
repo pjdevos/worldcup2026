@@ -33,6 +33,24 @@ export async function updateProfile(
   if (error) throw error;
 }
 
+/**
+ * Update tournament-wide picks (tiebreaker + top scorer). Pass null to
+ * clear a field, or omit it to leave it unchanged.
+ */
+export async function updateTournamentPicks(
+  userId: string,
+  picks: {
+    tiebreaker_bel_goals?: number | null;
+    top_scorer?: string | null;
+  },
+): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update(picks)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
 // ── Matches ─────────────────────────────────────────────────────────────
 
 export async function listMatches(): Promise<DbMatch[]> {
