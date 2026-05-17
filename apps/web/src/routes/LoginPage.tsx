@@ -1,147 +1,61 @@
-import { useState, type FormEvent } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { Navigate } from "react-router-dom";
+import { useIdentity, useIdentityActions } from "../lib/identity";
 
 export function LoginPage() {
-  const { playerName, loading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const identity = useIdentity();
+  const { login, loading } = useIdentityActions();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
-  if (loading) return null;
-  if (playerName) {
-    const from = (location.state as { from?: string })?.from || "/";
-    return <Navigate to={from} replace />;
-  }
+  if (identity) return <Navigate to="/" replace />;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-
-    // Client-side validation
-    if (!name.trim()) {
-      setError("Please enter your name");
-      return;
+    try {
+      await login(name, password);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
     }
-    if (!password) {
-      setError("Please enter the password");
-      return;
-    }
-
-    setStatus("submitting");
-
-    // Simulate a small delay to feel more like a real submission
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const correctPassword = import.meta.env.VITE_APP_PASSWORD;
-    if (!correctPassword) {
-      setError("Password not configured");
-      setStatus("error");
-      return;
-    }
-
-    if (password !== correctPassword) {
-      setError("Incorrect password");
-      setStatus("error");
-      return;
-    }
-
-    // Store the player name in localStorage
-    localStorage.setItem("worldcup_player_name", name.trim());
-
-    // Reload to pick up the new player name from localStorage
-    const from = (location.state as { from?: string })?.from || "/";
-    window.location.href = from;
   }
 
   return (
     <div className="section" style={{ maxWidth: 460, margin: "60px auto" }}>
       <div className="section-head">
         <h2>Sign in</h2>
-        <div className="hint">Enter your name and the shared password to continue.</div>
+        <div className="hint">
+          Enter your name and the shared FARI pool password.
+        </div>
       </div>
 
       <form
         onSubmit={submit}
-        style={{ display: "flex", flexDirection: "column", gap: 12 }}
+        style={{ display: "flex", flexDirection: "column", gap: 14 }}
       >
-        <div>
-          <label
-            htmlFor="name"
-            style={{
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              fontWeight: 700,
-              opacity: 0.7,
-              display: "block",
-              marginBottom: 6,
-            }}
-          >
-            Your name
-          </label>
+        <Field label="Your name" required>
           <input
-            id="name"
             type="text"
             required
             autoFocus
-            placeholder="Enter your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            disabled={status === "submitting"}
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid var(--line-soft)",
-              borderRadius: 8,
-              padding: "12px 14px",
-              font: "inherit",
-              color: "white",
-              fontSize: 15,
-              width: "100%",
-              boxSizing: "border-box",
-            }}
+            placeholder="e.g. Pieter-Jan"
+            autoComplete="username"
+            style={inputStyle}
           />
-        </div>
-
-        <div>
-          <label
-            htmlFor="password"
-            style={{
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              fontWeight: 700,
-              opacity: 0.7,
-              display: "block",
-              marginBottom: 6,
-            }}
-          >
-            Password
-          </label>
+        </Field>
+        <Field label="Pool password" required>
           <input
-            id="password"
             type="password"
             required
-            placeholder="Enter the password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={status === "submitting"}
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid var(--line-soft)",
-              borderRadius: 8,
-              padding: "12px 14px",
-              font: "inherit",
-              color: "white",
-              fontSize: 15,
-              width: "100%",
-              boxSizing: "border-box",
-            }}
+            autoComplete="current-password"
+            style={inputStyle}
           />
-        </div>
+        </Field>
 
         {error && (
           <div style={{ color: "#ff8a8a", fontSize: 12 }}>{error}</div>
@@ -149,18 +63,61 @@ export function LoginPage() {
 
         <button
           type="submit"
-          disabled={status === "submitting" || !name.trim() || !password}
+          disabled={loading || !name.trim() || !password}
           className="tab is-active"
           style={{
             alignSelf: "flex-start",
             padding: "10px 22px",
-            cursor: status === "submitting" ? "wait" : "pointer",
-            opacity: status === "submitting" ? 0.7 : 1,
+            cursor: loading ? "wait" : "pointer",
+            opacity: loading || !name.trim() || !password ? 0.6 : 1,
           }}
         >
-          {status === "submitting" ? "Signing in…" : "Sign in"}
+          {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
+
+      <p style={{ fontSize: 12, opacity: 0.6, marginTop: 18, lineHeight: 1.5 }}>
+        Use the same name on every visit — that's how your predictions are
+        tracked. Type a fresh name to claim a new player slot.
+      </p>
     </div>
   );
 }
+
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <label
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          fontWeight: 700,
+          opacity: 0.7,
+        }}
+      >
+        {label}
+        {required && <span style={{ color: "var(--fari-mint)" }}> *</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid var(--line-soft)",
+  borderRadius: 8,
+  padding: "12px 14px",
+  font: "inherit",
+  color: "white",
+  fontSize: 15,
+};

@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../lib/auth";
+import { useIdentity } from "../lib/identity";
 import { getLeaderboard, type LeaderboardRow } from "../lib/queries";
 
 export function LeaderboardPage() {
-  const { session } = useAuth();
+  const identity = useIdentity();
   const { data, isLoading } = useQuery<LeaderboardRow[]>({
     queryKey: ["leaderboard"],
     queryFn: getLeaderboard,
   });
 
-  const me = session?.user.id;
+  const me = identity?.userId;
 
   return (
     <div className="section">

@@ -13,7 +13,7 @@ import {
   type KnockoutTie,
 } from "../data/wk";
 import { fmtDate, fullWeekday } from "../lib/format";
-import { useAuth } from "../lib/auth";
+import { useIdentity } from "../lib/identity";
 import type { DbPrediction } from "../lib/database.types";
 import { listMyPredictions, upsertPrediction } from "../lib/queries";
 import { MatchRow, type MatchRowData, type StageLabel } from "./MatchRow";
@@ -68,8 +68,8 @@ function toKickAt(m: AnyMatch): Date {
 const LOCK_MS = 5 * 60 * 1000;
 
 export function CalendarView() {
-  const { session } = useAuth();
-  const userId = session?.user.id;
+  const identity = useIdentity();
+  const userId = identity?.userId;
   const qc = useQueryClient();
 
   // Tick a local clock every 30s so the editable/locked transition is live.

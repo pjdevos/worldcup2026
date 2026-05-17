@@ -1,8 +1,16 @@
-import { Link, NavLink } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useIdentity, useIdentityActions, useProfile } from "../lib/identity";
 
 export function AppNav() {
-  const { playerName, signOut } = useAuth();
+  const identity = useIdentity();
+  const { logout } = useIdentityActions();
+  const { data: profile } = useProfile();
+  const navigate = useNavigate();
+
+  function handleSignOut() {
+    logout();
+    navigate("/login");
+  }
 
   return (
     <div
@@ -34,21 +42,19 @@ export function AppNav() {
         </Link>
         <NavItem to="/schedule" label="Schedule" />
         <NavItem to="/leaderboard" label="Leaderboard" />
-        {playerName && <NavItem to="/profile" label="My predictions" />}
+        {identity && <NavItem to="/profile" label="My predictions" />}
+        {profile?.is_admin && <NavItem to="/admin" label="Admin" />}
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12 }}>
-        {playerName ? (
+        {identity ? (
           <>
             <span style={{ opacity: 0.7 }}>
-              <span style={{ color: "var(--fari-mint)" }}>●</span> {playerName}
+              <span style={{ color: "var(--fari-mint)" }}>●</span> {identity.name}
             </span>
             <button
               type="button"
-              onClick={() => {
-                signOut();
-                window.location.href = "/";
-              }}
+              onClick={handleSignOut}
               style={{
                 background: "transparent",
                 border: "1px solid var(--line-soft)",

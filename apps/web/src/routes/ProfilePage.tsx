@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { TEAMS } from "../data/wk";
-import { useAuth, useProfile } from "../lib/auth";
+import { useIdentity, useProfile } from "../lib/identity";
 import type { DbMatch, DbPrediction } from "../lib/database.types";
 import { formatKickoff, isLocked } from "../lib/matchHelpers";
 import { listMatches, listMyPredictions } from "../lib/queries";
 
 export function ProfilePage() {
-  const { session } = useAuth();
+  const identity = useIdentity();
   const { data: profile } = useProfile();
-  const userId = session?.user.id;
+  const userId = identity?.userId;
 
   const predictionsQ = useQuery<DbPrediction[]>({
     queryKey: ["my-predictions", userId ?? "anon"],
@@ -32,7 +32,7 @@ export function ProfilePage() {
     <>
       <div className="section" style={{ marginBottom: 24 }}>
         <div className="section-head">
-          <h2>{profile?.display_name ?? session?.user.email}</h2>
+          <h2>{profile?.display_name ?? identity?.name ?? "—"}</h2>
           <div className="hint">
             {profile?.team_name ? `Team: ${profile.team_name} · ` : ""}
             {predictions.length} prediction{predictions.length === 1 ? "" : "s"}

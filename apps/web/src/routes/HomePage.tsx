@@ -1,19 +1,19 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { useIdentity } from "../lib/identity";
 
 export function HomePage() {
-  const { session } = useAuth();
+  const identity = useIdentity();
 
   return (
     <>
-      <Hero session={Boolean(session)} />
+      <Hero signedIn={Boolean(identity)} />
       <FactsStrip />
       <BrandStrip />
     </>
   );
 }
 
-function Hero({ session }: { session: boolean }) {
+function Hero({ signedIn }: { signedIn: boolean }) {
   return (
     <section
       style={{
@@ -97,10 +97,10 @@ function Hero({ session }: { session: boolean }) {
             <Arrow />
           </Link>
           <Link
-            to={session ? "/profile" : "/login"}
+            to={signedIn ? "/profile" : "/login"}
             style={ctaSecondary}
           >
-            {session ? "My predictions" : "Sign in to get started"}
+            {signedIn ? "My predictions" : "Sign in to get started"}
             <Arrow />
           </Link>
         </div>

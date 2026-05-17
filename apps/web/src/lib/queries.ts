@@ -233,35 +233,6 @@ export async function getCronStatus(): Promise<CronStatus> {
   };
 }
 
-export interface FetchNowResult {
-  ok: boolean;
-  checked: number;
-  updated: number;
-  errors: number;
-  error_message?: string;
-}
-
-/**
- * Trigger the cron logic manually. Calls /api/admin/fetch-now with the
- * current Supabase access token; server-side checks is_admin.
- */
-export async function triggerFetchNow(): Promise<FetchNowResult> {
-  const { data: sessionRes } = await supabase.auth.getSession();
-  const token = sessionRes.session?.access_token;
-  if (!token) throw new Error("Niet ingelogd");
-
-  const res = await fetch("/api/admin/fetch-now", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!res.ok) {
-    throw new Error(
-      (body.error as string) ?? `HTTP ${res.status}`,
-    );
-  }
-  return body as unknown as FetchNowResult;
-}
+// Note: manual "Fetch now" was removed when we switched off Supabase Auth —
+// the endpoint relied on a Supabase JWT. The Vercel cron still runs daily;
+// for immediate updates admins enter scores manually via the admin page.

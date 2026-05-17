@@ -8,9 +8,7 @@ import {
   listMatches,
   listScoringRules,
   setMatchResultAndScore,
-  triggerFetchNow,
   type CronStatus,
-  type FetchNowResult,
 } from "../lib/queries";
 import { supabase } from "../lib/supabase";
 
@@ -269,22 +267,10 @@ function nameOf(code: string | null, slot: string | null): string {
 // ─── Cron status + manual "Fetch now" ─────────────────────────────────
 
 function CronStatusPanel() {
-  const qc = useQueryClient();
   const { data, isLoading } = useQuery<CronStatus>({
     queryKey: ["cron-status"],
     queryFn: getCronStatus,
     refetchInterval: 60_000,
-  });
-
-  const [lastResult, setLastResult] = useState<FetchNowResult | null>(null);
-  const fetchNow = useMutation({
-    mutationFn: triggerFetchNow,
-    onSuccess: (res) => {
-      setLastResult(res);
-      void qc.invalidateQueries({ queryKey: ["cron-status"] });
-      void qc.invalidateQueries({ queryKey: ["matches"] });
-      void qc.invalidateQueries({ queryKey: ["leaderboard"] });
-    },
   });
 
   const lastRun = data?.lastRun;
@@ -295,7 +281,8 @@ function CronStatusPanel() {
       <div className="section-head">
         <h2 style={{ fontSize: 18 }}>Auto-fetch · football-data.org</h2>
         <div className="hint">
-          The cron runs hourly and pulls in final scores. Trigger it manually with the button below.
+          Vercel cron runs daily and pulls in final scores. Use the manual
+          score-entry table below for immediate updates.
         </div>
       </div>
 
@@ -305,7 +292,7 @@ function CronStatusPanel() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr auto",
+            gridTemplateColumns: "1fr 1fr",
             gap: 12,
             alignItems: "start",
             background: "rgba(255,255,255,0.05)",
@@ -322,40 +309,6 @@ function CronStatusPanel() {
             )}
           </Stat>
           <Stat label="Auto-updated today" value={`${data.autoUpdatedToday} match${data.autoUpdatedToday === 1 ? "" : "es"}`} />
-          <button
-            type="button"
-            onClick={() => fetchNow.mutate()}
-            disabled={fetchNow.isPending}
-            className="tab is-active"
-            style={{
-              padding: "10px 18px",
-              cursor: fetchNow.isPending ? "wait" : "pointer",
-              alignSelf: "center",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {fetchNow.isPending ? "Working…" : "Fetch now"}
-          </button>
-        </div>
-      )}
-
-      {fetchNow.isError && (
-        <div style={{ color: "#ff8a8a", fontSize: 12, marginTop: 8 }}>
-          {fetchNow.error instanceof Error ? fetchNow.error.message : String(fetchNow.error)}
-        </div>
-      )}
-
-      {lastResult && !fetchNow.isPending && (
-        <div
-          style={{
-            fontSize: 12,
-            marginTop: 8,
-            color: lastResult.ok ? "var(--fari-mint-bright)" : "#ff8a8a",
-          }}
-        >
-          {lastResult.ok ? "✓ " : "⚠ "}
-          checked: {lastResult.checked} · updated: {lastResult.updated} · errors: {lastResult.errors}
-          {lastResult.error_message && <> · {lastResult.error_message}</>}
         </div>
       )}
 

@@ -5,16 +5,16 @@ import {
   TOURNAMENT_LOCK,
   isCanonicalTopScorer,
 } from "../data/topScorers";
-import { useAuth, useProfile } from "../lib/auth";
+import { useIdentity, useProfile } from "../lib/identity";
 import { updateTournamentPicks } from "../lib/queries";
 
 const OTHER_SENTINEL = "__OTHER__";
 
 export function TournamentPicks() {
-  const { session } = useAuth();
+  const identity = useIdentity();
   const { data: profile } = useProfile();
   const qc = useQueryClient();
-  const userId = session?.user.id;
+  const userId = identity?.userId;
 
   const [goals, setGoals] = useState<number>(profile?.tiebreaker_bel_goals ?? 0);
   const [scorer, setScorer] = useState<string>(profile?.top_scorer ?? "");

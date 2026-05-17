@@ -1,9 +1,10 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { useIdentity, useProfile } from "../lib/identity";
 
 /**
- * Gate a route behind authentication. If not signed in, send to /login with
- * the original path in state so the callback can return there.
+ * Gate a route behind the shared-password login. If not signed in, redirect
+ * to /login. If `requireAdmin` is set, also enforce the profile's is_admin
+ * flag (set per-name via SQL).
  */
 export function ProtectedRoute({
   children,
@@ -12,19 +13,17 @@ export function ProtectedRoute({
   children: React.ReactNode;
   requireAdmin?: boolean;
 }) {
-  const { playerName, loading } = useAuth();
+  const identity = useIdentity();
+  const { data: profile, isLoading } = useProfile();
   const location = useLocation();
 
-  if (loading) return null;
-
-  if (!playerName) {
+  if (!identity) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  // For now, we don't have admin role tracking in localStorage.
-  // If you need admin checks, implement them separately.
   if (requireAdmin) {
-    return <Navigate to="/" replace />;
+    if (isLoading) return null;
+    if (!profile?.is_admin) return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

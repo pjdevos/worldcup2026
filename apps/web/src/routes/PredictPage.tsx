@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { useIdentity } from "../lib/identity";
 import type { DbMatch, DbPrediction } from "../lib/database.types";
 import {
   formatKickoff,
@@ -13,7 +13,7 @@ import { getMatch, getMyPrediction, upsertPrediction } from "../lib/queries";
 
 export function PredictPage() {
   const { matchId: matchIdRaw } = useParams();
-  const { session } = useAuth();
+  const identity = useIdentity();
   const matchId = Number(matchIdRaw);
 
   if (!Number.isInteger(matchId) || matchId < 1 || matchId > 104) {
@@ -25,7 +25,7 @@ export function PredictPage() {
     queryFn: () => getMatch(matchId),
   });
 
-  const userId = session?.user.id;
+  const userId = identity?.userId;
   const { data: existing } = useQuery<DbPrediction | null>({
     queryKey: ["prediction", matchId, userId ?? "anon"],
     queryFn: () => (userId ? getMyPrediction(userId, matchId) : Promise.resolve(null)),
@@ -56,7 +56,7 @@ function PredictForm({
   match: DbMatch;
   existing: DbPrediction | null;
 }) {
-  const { session } = useAuth();
+  const identity = useIdentity();
   const qc = useQueryClient();
   const [home, setHome] = useState(existing?.home_score ?? 0);
   const [away, setAway] = useState(existing?.away_score ?? 0);
@@ -75,8 +75,8 @@ function PredictForm({
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!session) throw new Error("Not signed in");
-      await upsertPrediction(session.user.id, match.id, home, away);
+      if (!identity) throw new Error("Not signed in");
+      await upsertPrediction(identity.userId, match.id, home, away);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["prediction", match.id] });
