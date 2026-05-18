@@ -44,6 +44,45 @@ export function ProfilePage() {
         </div>
       </div>
 
+      <div className="section" style={{ marginBottom: 24 }}>
+        <div className="section-head">
+          <h2 style={{ fontSize: 18 }}>Tournament picks</h2>
+          <div className="hint">
+            Locks at the opening match. Edit on the{" "}
+            <Link to="/schedule?tab=calendar" style={{ color: "var(--fari-mint)" }}>
+              Calendar
+            </Link>
+            .
+          </div>
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 14,
+          }}
+        >
+          <PickCard
+            label="Top scorer"
+            value={profile?.top_scorer ?? null}
+            empty="not picked yet"
+            footnote="Worth 25 points if correct"
+          />
+          <PickCard
+            label="Belgium goals (tiebreaker)"
+            value={
+              profile?.tiebreaker_bel_goals != null
+                ? `${profile.tiebreaker_bel_goals} goal${
+                    profile.tiebreaker_bel_goals === 1 ? "" : "s"
+                  }`
+                : null
+            }
+            empty="no guess yet"
+            footnote="Used only to break a tied leaderboard"
+          />
+        </div>
+      </div>
+
       <div className="section">
         <div className="section-head">
           <h2 style={{ fontSize: 18 }}>My predictions</h2>
@@ -69,6 +108,54 @@ export function ProfilePage() {
         )}
       </div>
     </>
+  );
+}
+
+function PickCard({
+  label,
+  value,
+  empty,
+  footnote,
+}: {
+  label: string;
+  value: string | null;
+  empty: string;
+  footnote: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "rgba(255,255,255,0.045)",
+        border: "1px solid var(--line-soft)",
+        borderRadius: 12,
+        padding: "14px 16px",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.6)",
+          fontWeight: 700,
+          marginBottom: 8,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 18,
+          fontWeight: 700,
+          fontFamily: "JetBrains Mono, monospace",
+          marginBottom: 6,
+          opacity: value ? 1 : 0.45,
+        }}
+      >
+        {value ?? empty}
+      </div>
+      <div style={{ fontSize: 11, opacity: 0.55 }}>{footnote}</div>
+    </div>
   );
 }
 
