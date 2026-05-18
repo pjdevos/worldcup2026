@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useIdentity } from "../lib/identity";
-import { getLeaderboard, type LeaderboardRow } from "../lib/queries";
+import type { DbScoringRule } from "../lib/database.types";
+import {
+  getLeaderboard,
+  listScoringRules,
+  type LeaderboardRow,
+} from "../lib/queries";
 
 export function LeaderboardPage() {
   const identity = useIdentity();
@@ -29,7 +34,23 @@ export function LeaderboardPage() {
       )}
 
       {data && data.length > 0 && (
-        <table
+        <Table data={data} me={me} />
+      )}
+
+      <RulesSection />
+    </div>
+  );
+}
+
+function Table({
+  data,
+  me,
+}: {
+  data: LeaderboardRow[];
+  me: string | undefined;
+}) {
+  return (
+    <table
           style={{
             width: "100%",
             borderCollapse: "collapse",
@@ -89,7 +110,180 @@ export function LeaderboardPage() {
             })}
           </tbody>
         </table>
-      )}
+  );
+}
+
+// ── Rules section ──────────────────────────────────────────────────────
+
+function RulesSection() {
+  const { data } = useQuery<DbScoringRule[]>({
+    queryKey: ["scoring-rules"],
+    queryFn: listScoringRules,
+  });
+  const map = new Map<string, number>((data ?? []).map((r) => [r.key, r.value]));
+  const v = (k: string): string =>
+    map.has(k) ? `${map.get(k)} pt` : "—";
+
+  return (
+    <section style={{ marginTop: 56 }}>
+      <div className="section-head">
+        <h2 style={{ fontSize: 20 }}>Pool rules</h2>
+      </div>
+
+      <div
+        style={{
+          fontSize: 13,
+          lineHeight: 1.65,
+          color: "rgba(255,255,255,0.82)",
+          maxWidth: 760,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        <p style={{ margin: 0 }}>
+          Entry is <b style={{ color: "white" }}>€5</b> per player. Winner
+          takes the pot — winner takes it all.
+        </p>
+        <p style={{ margin: 0 }}>
+          <b style={{ color: "white" }}>Before the World Cup starts</b>, fill
+          in all 72 group-stage matches. In this phase what mostly counts is
+          who wins / draws / loses, who tops the group and finishes second,
+          and who advances as one of the best thirds.
+        </p>
+        <p style={{ margin: 0 }}>
+          <b style={{ color: "white" }}>
+            After the last group match and before the first Round-of-32 fixture
+          </b>
+          , fill in the entire knockout bracket.
+        </p>
+        <p style={{ margin: 0 }}>
+          <b style={{ color: "white" }}>Tiebreakers.</b> If two players end on
+          the same total, the <b>Belgium goals</b> tiebreaker decides (closest
+          to the actual number of goals Belgium scores across the tournament).
+          If still tied, we compare the <b>number of correctly predicted matches</b>.
+        </p>
+      </div>
+
+      <h3
+        style={{
+          fontSize: 14,
+          fontWeight: 700,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "var(--fari-mint)",
+          marginTop: 32,
+          marginBottom: 14,
+        }}
+      >
+        Scoring
+      </h3>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 18,
+          maxWidth: 960,
+        }}
+      >
+        <RuleGroup
+          title="Group stage"
+          subtitle="prediction is the exact score"
+          rows={[
+            { label: "Correct winner or draw", value: v("group_winner") },
+            { label: "Exact score (replaces above)", value: v("group_exact") },
+          ]}
+        />
+        <RuleGroup
+          title="Knockout · winner pick"
+          subtitle="picked via the score you enter"
+          rows={[
+            { label: "Round of 32", value: v("r32_winner") },
+            { label: "Round of 16", value: v("r16_winner") },
+            { label: "Quarter-final", value: v("qf_winner") },
+            { label: "Semi-final", value: v("sf_winner") },
+            { label: "Final", value: v("final_winner") },
+            { label: "Exact final score (bonus)", value: `+${v("final_exact_bonus").replace(" pt","")} pt` },
+          ]}
+        />
+        <RuleGroup
+          title="Tournament bonus"
+          subtitle="awarded at the end"
+          rows={[
+            { label: "Top scorer correct", value: v("top_scorer") },
+          ]}
+        />
+      </div>
+    </section>
+  );
+}
+
+function RuleGroup({
+  title,
+  subtitle,
+  rows,
+}: {
+  title: string;
+  subtitle: string;
+  rows: Array<{ label: string; value: string }>;
+}) {
+  return (
+    <div
+      style={{
+        background: "rgba(255,255,255,0.045)",
+        border: "1px solid var(--line-soft)",
+        borderRadius: 12,
+        padding: "16px 18px",
+        fontSize: 13,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          fontWeight: 700,
+          color: "var(--fari-mint)",
+          marginBottom: 2,
+        }}
+      >
+        {title}
+      </div>
+      <div
+        style={{
+          fontSize: 11,
+          opacity: 0.55,
+          marginBottom: 14,
+        }}
+      >
+        {subtitle}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {rows.map((r) => (
+          <div
+            key={r.label}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              gap: 10,
+            }}
+          >
+            <span style={{ color: "rgba(255,255,255,0.85)" }}>{r.label}</span>
+            <span
+              style={{
+                fontFamily: "JetBrains Mono, monospace",
+                fontWeight: 700,
+                color: "white",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {r.value}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
