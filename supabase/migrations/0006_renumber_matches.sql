@@ -19,5 +19,8 @@
 --   - all FIFA M1..M72 are correctly mapped; knockouts unchanged (73-104)
 -- ──────────────────────────────────────────────────────────────────────────
 
-truncate table predictions;
-truncate table matches;
+-- predictions.match_id still has its FK to matches(id) — Postgres refuses
+-- to truncate `matches` while that FK exists, even if predictions is empty.
+-- TRUNCATE-ing both in the same statement (or using CASCADE) lifts the
+-- constraint for the duration of the operation.
+truncate table predictions, matches;
