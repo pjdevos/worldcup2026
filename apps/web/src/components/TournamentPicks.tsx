@@ -302,13 +302,17 @@ function TopScorerInput({
         }}
         style={inputStyle}
       >
-        <option value="">Pick a player…</option>
+        <option value="" style={optionStyle}>
+          Pick a player…
+        </option>
         {TOP_SCORER_OPTIONS.map((p) => (
-          <option key={p} value={p}>
+          <option key={p} value={p} style={optionStyle}>
             {p}
           </option>
         ))}
-        <option value={OTHER_SENTINEL}>Someone else…</option>
+        <option value={OTHER_SENTINEL} style={optionStyle}>
+          Someone else…
+        </option>
       </select>
       {otherMode && (
         <input
@@ -348,4 +352,15 @@ const inputStyle: React.CSSProperties = {
   color: "white",
   fontSize: 14,
   width: "100%",
+};
+
+// The native dropdown popup (rendered by the browser, not our DOM) doesn't
+// inherit the select's `background`, so it falls back to system colors —
+// often white. Forcing a dark background + light text on each <option>
+// makes the open list readable in our dark theme. Works in Chrome/Firefox/
+// Edge; Safari ignores some of this but degrades to system default which
+// is also readable.
+const optionStyle: React.CSSProperties = {
+  background: "#14306f", // var(--fari-blue-deep)
+  color: "white",
 };
