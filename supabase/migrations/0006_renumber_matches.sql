@@ -1,0 +1,23 @@
+-- ──────────────────────────────────────────────────────────────────────────
+-- Renumber group-stage matches to official FIFA match numbers (M1..M72).
+--
+-- Background: matches.id was originally positional (idx+1 of the GROUP_STAGE
+-- array in wk.ts). That order didn't match FIFA's published numbering
+-- (their M5 = Haiti–Scotland, ours was Qatar–Switzerland). The new wk.ts
+-- emits matches with FIFA's official numbers; knockouts (73-104) were
+-- already aligned.
+--
+-- Since match_id is part of predictions' identity, the safe path is:
+--   1. wipe predictions (test data only at this point — tournament hasn't
+--      started yet, today is 18 May 2026)
+--   2. wipe matches so the re-seed can insert clean rows with the new ids
+--   3. user re-runs supabase/seed/seed.sql to repopulate matches
+--
+-- After this migration:
+--   - run `pnpm seed:gen` locally to regenerate seed.sql
+--   - paste seed.sql in the Supabase SQL editor → Run
+--   - all FIFA M1..M72 are correctly mapped; knockouts unchanged (73-104)
+-- ──────────────────────────────────────────────────────────────────────────
+
+truncate table predictions;
+truncate table matches;

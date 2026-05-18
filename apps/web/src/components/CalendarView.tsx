@@ -37,9 +37,9 @@ function tieToRow(t: KnockoutTie, stage: StageLabel): AnyMatch {
   };
 }
 
-function groupToRow(m: GroupMatch, idx: number): AnyMatch {
+function groupToRow(m: GroupMatch): AnyMatch {
   return {
-    id: idx + 1,
+    id: m.n,
     date: m.date,
     kick: m.kick,
     home: m.home,
@@ -81,7 +81,7 @@ export function CalendarView() {
 
   const allMatches = useMemo<AnyMatch[]>(() => {
     return [
-      ...GROUP_STAGE.map((m, i) => groupToRow(m, i)),
+      ...GROUP_STAGE.map((m) => groupToRow(m)),
       ...R32.map((t) => tieToRow(t, "R32")),
       ...R16.map((t) => tieToRow(t, "R16")),
       ...QF.map((t) => tieToRow(t, "QF")),

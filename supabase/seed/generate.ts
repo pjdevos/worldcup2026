@@ -44,10 +44,10 @@ const venueRows = VENUES.map(
   (v) => `('${esc(v.city)}', '${v.country}', '${esc(v.name)}', ${v.cap})`,
 );
 
-const groupMatchRows = GROUP_STAGE.map((m, idx) => {
-  const id = idx + 1;
-  return `(${id}, 'group', '${m.group}', '${toIsoUtc(m.date, m.kick)}', '${m.home}', '${m.away}', null, null)`;
-});
+const groupMatchRows = GROUP_STAGE.map(
+  (m) =>
+    `(${m.n}, 'group', '${m.group}', '${toIsoUtc(m.date, m.kick)}', '${m.home}', '${m.away}', null, null)`,
+);
 
 const knockoutRows = (() => {
   const rows: string[] = [];
