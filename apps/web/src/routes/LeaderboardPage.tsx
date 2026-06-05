@@ -142,8 +142,7 @@ function RulesSection() {
         }}
       >
         <p style={{ margin: 0 }}>
-          Entry is <b style={{ color: "white" }}>€5</b> per player. Winner
-          takes the pot — winner takes it all.
+          Entry is free. There will be one winner, who will receive a coveted prize (which is still to be determined by Carl).
         </p>
         <p style={{ margin: 0 }}>
           <b style={{ color: "white" }}>Before the World Cup starts</b>, fill
