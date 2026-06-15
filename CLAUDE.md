@@ -189,6 +189,13 @@ ordered total.
   rejects hourly. "Fetch now" admin button removed (used Supabase JWT).
 - **2026-05-16:** Replaced magic-link auth with shared-password (`VITE_APP_PASSWORD`).
   RLS disabled; profile keyed by display_name; auth.users no longer used.
+- **2026-06-15:** Fixed the cron that left the leaderboard never updating. The
+  handler had `runtime: "nodejs"` but a Fetch-style signature (`Request` →
+  `Response`, `req.headers.get()`), so every invocation threw
+  `FUNCTION_INVOCATION_FAILED` before logging. Rewrote it Node-style
+  (`(req, res)` with `node:http` types) on the default Node.js runtime. A first
+  attempt to switch to `runtime: "edge"` failed: `supabase-js` (realtime/ws)
+  isn't Edge-safe, so `createClient()` crashed with a 500 and no outgoing request.
 
 ## Constraints worth remembering
 
@@ -196,6 +203,13 @@ ordered total.
 - **Small audience.** FARI colleagues with the shared password. Honor-system
   trust model — anyone with the password can claim any name, but that's a
   social problem, not a technical one to solve.
+- **Cron must run on the Node.js runtime, never Edge.** `runFetchResults`
+  builds a `@supabase/supabase-js` client, whose realtime/ws dependency is not
+  Edge-safe and crashes `createClient()` at runtime (500, "no outgoing
+  requests"). Keep [`api/cron/fetch-results.ts`](apps/web/api/cron/fetch-results.ts)
+  Node-style (`(req, res)`, no `config.runtime` export). Don't reintroduce a
+  Fetch-style `Request`/`Response` handler — on the Node runtime `req.headers`
+  has no `.get()` and the function throws before doing anything.
 - **Vercel Hobby plan.** Cron limited to daily. If hourly cadence becomes
   important during the tournament, either upgrade to Pro or use cron-job.org
   to ping `/api/cron/fetch-results` externally with the `CRON_SECRET` header.
