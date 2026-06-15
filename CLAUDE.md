@@ -181,6 +181,12 @@ ordered total.
    date+kick into `wk.ts`; `--sql` emits `supabase/seed/fix-group-kickoffs.sql`.
    Group stage done; knockout ties still illustrative (no resolved teams yet —
    re-run after the draw resolves).
+6. **Knockout kickoff times still illustrative** — only the 72 group matches
+   were corrected to official times. The knockout ties (R32–Final) in `wk.ts`
+   keep their placeholder Brussels times and have the same US-date/Brussels-kick
+   gluing bug. Once the bracket teams resolve (after 27 June), re-run
+   `scripts/import-official-times.ts` (extend it to cover the knockout arrays)
+   then apply the regenerated `fix-group-kickoffs.sql`-style update to the DB.
 
 ## Recent history (for context across sessions)
 
