@@ -39,6 +39,9 @@ export default async function handler(
     const summary = await runFetchResults();
     return send(res, summary.ok ? 200 : 502, summary);
   } catch (err) {
+    // Log to Vercel Runtime Logs (the JSON body below is only seen by the
+    // cron caller, which discards it).
+    console.error("[cron/fetch-results] failed:", err);
     const msg =
       err instanceof Error
         ? `${err.message}\n${err.stack ?? ""}`
