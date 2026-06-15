@@ -174,10 +174,23 @@ ordered total.
    "who picked closest". Mentioned in the spec; not yet built.
 4. **External-ID mapping script** — `scripts/map-external-ids.ts` once FIFA
    times import is done, to populate `matches.external_id` for the cron.
-5. **Official FIFA times import** — `scripts/import-official-times.ts` to
-   overwrite illustrative kickoff times before tournament starts.
+5. ~~**Official FIFA times import**~~ — DONE (2026-06-15).
+   [`scripts/import-official-times.ts`](scripts/import-official-times.ts) pulls
+   authoritative `utcDate`s from football-data.org, matches by TLA pair (with a
+   `URU→URY` alias + name fallback), and `--write`s the corrected Brussels
+   date+kick into `wk.ts`; `--sql` emits `supabase/seed/fix-group-kickoffs.sql`.
+   Group stage done; knockout ties still illustrative (no resolved teams yet —
+   re-run after the draw resolves).
 
 ## Recent history (for context across sessions)
+
+- **2026-06-15:** Replaced the illustrative group-stage kickoff times with
+  official ones from football-data.org (see open-work #5). The old data glued a
+  US calendar `date` to a Brussels `kick`, so post-midnight-Brussels matches
+  showed the wrong day (and broke the cron's date-based team matching → only
+  7/11 auto-fetched). 68 of 72 times changed. The calendar reads `wk.ts`
+  directly, so the fix lives there; the DB was updated via
+  `fix-group-kickoffs.sql` (kick_at only, scores untouched).
 
 - **2026-05-15:** Scaffold + initial deploy. Magic-link auth.
 - **2026-05-16:** Translated UI to English; redesigned homepage with the
