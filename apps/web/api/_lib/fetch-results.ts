@@ -54,8 +54,12 @@ function adminClient(): SupabaseClient {
   const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
+    // Report presence only (never the values) so we can see which name the
+    // function runtime actually receives.
     throw new Error(
-      "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment",
+      `Missing Supabase env. SUPABASE_URL=${process.env.SUPABASE_URL ? "set" : "unset"}, ` +
+        `VITE_SUPABASE_URL=${process.env.VITE_SUPABASE_URL ? "set" : "unset"}, ` +
+        `SUPABASE_SERVICE_ROLE_KEY=${key ? "set" : "unset"}`,
     );
   }
   return createClient(url, key, {
