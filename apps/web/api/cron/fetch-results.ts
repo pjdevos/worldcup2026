@@ -35,7 +35,9 @@ export default async function handler(
   }
 
   try {
-    const { runFetchResults } = await import("../_lib/fetch-results");
+    // Explicit .js extension: Vercel compiles each file to native ESM and does
+    // NOT bundle, so extension-less relative imports throw ERR_MODULE_NOT_FOUND.
+    const { runFetchResults } = await import("../_lib/fetch-results.js");
     const summary = await runFetchResults();
     return send(res, summary.ok ? 200 : 502, summary);
   } catch (err) {
