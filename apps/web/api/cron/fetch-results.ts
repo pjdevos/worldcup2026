@@ -5,7 +5,7 @@
 
 import { runFetchResults } from "../_lib/fetch-results";
 
-export const config = { runtime: "nodejs" };
+export const config = { runtime: "edge" };
 
 export default async function handler(req: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
