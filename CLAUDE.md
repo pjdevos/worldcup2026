@@ -189,13 +189,21 @@ ordered total.
   rejects hourly. "Fetch now" admin button removed (used Supabase JWT).
 - **2026-05-16:** Replaced magic-link auth with shared-password (`VITE_APP_PASSWORD`).
   RLS disabled; profile keyed by display_name; auth.users no longer used.
-- **2026-06-15:** Fixed the cron that left the leaderboard never updating. The
-  handler had `runtime: "nodejs"` but a Fetch-style signature (`Request` →
-  `Response`, `req.headers.get()`), so every invocation threw
-  `FUNCTION_INVOCATION_FAILED` before logging. Rewrote it Node-style
-  (`(req, res)` with `node:http` types) on the default Node.js runtime. A first
-  attempt to switch to `runtime: "edge"` failed: `supabase-js` (realtime/ws)
-  isn't Edge-safe, so `createClient()` crashed with a 500 and no outgoing request.
+- **2026-06-15:** Fixed the cron that left the leaderboard never updating —
+  it had **never run successfully** since launch. Debugged through a chain of
+  causes: (1) handler had `runtime: "nodejs"` but a Fetch-style signature
+  (`Request`/`Response`, `req.headers.get()`) → `FUNCTION_INVOCATION_FAILED`;
+  (2) switching to `runtime: "edge"` crashed in `createClient()` because
+  `supabase-js` (realtime/ws) isn't Edge-safe; (3) back on Node, the
+  extension-less import `../_lib/fetch-results` threw `ERR_MODULE_NOT_FOUND`
+  (Vercel compiles each api file to native ESM and does **not** bundle, so
+  relative imports need an explicit `.js`); (4) finally, `SUPABASE_SERVICE_ROLE_KEY`
+  wasn't reaching the function runtime. Net result: handler is Node-style
+  `(req, res)` (`node:http` types), loads the supabase logic via
+  `await import("../_lib/fetch-results.js")` inside a try/catch that
+  `console.error`s the real stack to Runtime Logs. First good run pulled 7/11
+  finished matches; the rest were filled manually (API hadn't marked them
+  FINISHED yet — the daily run picks up stragglers automatically).
 
 ## Constraints worth remembering
 
@@ -210,6 +218,15 @@ ordered total.
   Node-style (`(req, res)`, no `config.runtime` export). Don't reintroduce a
   Fetch-style `Request`/`Response` handler — on the Node runtime `req.headers`
   has no `.get()` and the function throws before doing anything.
+- **Serverless `api/` files are native ESM and NOT bundled by Vercel.**
+  Relative imports between api files MUST carry an explicit `.js` extension
+  (e.g. `import("../_lib/fetch-results.js")`), even though the source is `.ts`
+  — otherwise `ERR_MODULE_NOT_FOUND` at runtime. `moduleResolution: bundler`
+  maps `.js` back to the `.ts` source at typecheck, so it still type-checks.
+- **The cron needs `SUPABASE_SERVICE_ROLE_KEY` in Vercel (Production scope).**
+  `VITE_`-prefixed vars do reach functions at runtime (the URL falls back to
+  `VITE_SUPABASE_URL`), but the service-role key has no `VITE_` twin. Env-var
+  changes only apply to **new** deployments — redeploy after editing them.
 - **Vercel Hobby plan.** Cron limited to daily. If hourly cadence becomes
   important during the tournament, either upgrade to Pro or use cron-job.org
   to ping `/api/cron/fetch-results` externally with the `CRON_SECRET` header.
