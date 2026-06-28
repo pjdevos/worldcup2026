@@ -1,10 +1,50 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { TEAMS } from "../data/wk";
 import { useIdentity, useProfile } from "../lib/identity";
-import type { DbMatch, DbPrediction } from "../lib/database.types";
+import type { DbMatch, DbPrediction, Stage } from "../lib/database.types";
 import { formatKickoff, isLocked } from "../lib/matchHelpers";
 import { listMatches, listMyPredictions } from "../lib/queries";
+
+const STAGE_ORDER: Stage[] = ["group", "r32", "r16", "qf", "sf", "third", "final"];
+const STAGE_LABEL: Record<Stage, string> = {
+  group: "Group stage",
+  r32: "Round of 32",
+  r16: "Round of 16",
+  qf: "Quarter-finals",
+  sf: "Semi-finals",
+  third: "3rd place",
+  final: "Final",
+};
+
+const stageHeader: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  width: "100%",
+  background: "transparent",
+  border: "none",
+  cursor: "pointer",
+  padding: "12px 2px 6px",
+  color: "rgba(255,255,255,0.6)",
+  font: "inherit",
+  fontSize: 10,
+  fontWeight: 700,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+};
+
+const stageCount: React.CSSProperties = {
+  fontSize: 9,
+  fontFamily: "JetBrains Mono, monospace",
+  letterSpacing: "0.05em",
+  fontWeight: 600,
+  color: "rgba(255,255,255,0.6)",
+  background: "rgba(255,255,255,0.08)",
+  padding: "1px 6px",
+  borderRadius: 3,
+};
 
 export function ProfilePage() {
   const identity = useIdentity();
@@ -27,6 +67,27 @@ export function ProfilePage() {
 
   const totalPoints = predictions.reduce((sum, p) => sum + (p.points ?? 0), 0);
   const scoredCount = predictions.filter((p) => p.points !== null).length;
+
+  // Group predictions by stage under collapsible headers (group stage folds
+  // away by default, mirroring the calendar).
+  const rows = predictions
+    .map((p) => ({ pred: p, match: matchesById.get(p.match_id)! }))
+    .sort((a, b) => a.match.kick_at.localeCompare(b.match.kick_at));
+  const buckets = STAGE_ORDER.map((stage) => ({
+    stage,
+    items: rows.filter((r) => r.match.stage === stage),
+  })).filter((b) => b.items.length > 0);
+
+  const [openStages, setOpenStages] = useState<Set<Stage>>(
+    () => new Set(STAGE_ORDER.filter((s) => s !== "group")),
+  );
+  const toggleStage = (stage: Stage) =>
+    setOpenStages((prev) => {
+      const next = new Set(prev);
+      if (next.has(stage)) next.delete(stage);
+      else next.add(stage);
+      return next;
+    });
 
   return (
     <>
@@ -97,13 +158,42 @@ export function ProfilePage() {
             </Link>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {predictions
-              .map((p) => ({ pred: p, match: matchesById.get(p.match_id)! }))
-              .sort((a, b) => a.match.kick_at.localeCompare(b.match.kick_at))
-              .map(({ pred, match }) => (
-                <PredictionRow key={pred.id} pred={pred} match={match} />
-              ))}
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {buckets.map(({ stage, items }) => {
+              const open = openStages.has(stage);
+              return (
+                <div key={stage}>
+                  <button
+                    type="button"
+                    onClick={() => toggleStage(stage)}
+                    aria-expanded={open}
+                    style={stageHeader}
+                  >
+                    <span style={{ fontSize: 9, width: 9, textAlign: "center" }}>
+                      {open ? "▾" : "▸"}
+                    </span>
+                    <span style={{ flex: 1, textAlign: "left" }}>
+                      {STAGE_LABEL[stage]}
+                    </span>
+                    <span style={stageCount}>{items.length}</span>
+                  </button>
+                  {open && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 6,
+                        marginTop: 2,
+                      }}
+                    >
+                      {items.map(({ pred, match }) => (
+                        <PredictionRow key={pred.id} pred={pred} match={match} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
