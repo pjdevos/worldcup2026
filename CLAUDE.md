@@ -174,20 +174,24 @@ ordered total.
    "who picked closest". Mentioned in the spec; not yet built.
 4. **External-ID mapping script** — `scripts/map-external-ids.ts` once FIFA
    times import is done, to populate `matches.external_id` for the cron.
-5. ~~**Official FIFA times import**~~ — DONE (2026-06-15).
-   [`scripts/import-official-times.ts`](scripts/import-official-times.ts) pulls
-   authoritative `utcDate`s from football-data.org, matches by TLA pair (with a
-   `URU→URY` alias + name fallback), and `--write`s the corrected Brussels
-   date+kick into `wk.ts`; `--sql` emits `supabase/seed/fix-group-kickoffs.sql`.
-   Group stage done; knockout ties still illustrative (no resolved teams yet —
-   re-run after the draw resolves).
+5. ~~**Official FIFA times import**~~ — DONE (2026-06-15, extended to knockouts
+   2026-06-28). [`scripts/import-official-times.ts`](scripts/import-official-times.ts)
+   pulls authoritative `utcDate`s from football-data.org, matches by TLA pair
+   (with a `URU→URY` alias + name fallback), and `--write`s the corrected
+   Brussels date+kick into `wk.ts`. It now covers the group stage **and any
+   resolved knockout tie** (both sides are real team codes): `--sql` emits
+   `supabase/seed/fix-group-kickoffs.sql` (kick_at) and
+   `supabase/seed/fix-knockouts.sql` (teams + cleared slots + kick_at).
 6. **R16–Final kickoff times still illustrative** — the 72 group matches and
    now the 16 **R32** ties carry official times (R32 resolved 2026-06-28, see
    history). The later rounds (R16/QF/SF/3rd/Final) in `wk.ts` keep `W##`
-   placeholders and illustrative Brussels times. As each round resolves, replace
-   the `W##`/`V##` placeholders in the relevant `wk.ts` array with the actual
-   team codes + official date/kick/venue, run `pnpm seed:gen`, and apply a
-   `fix-r32-resolved.sql`-style DB delta (sets teams + `kick_at`, clears slots).
+   placeholders and illustrative Brussels times. As each round resolves:
+   (1) replace its `W##`/`V##` placeholders in `wk.ts` with the qualified team
+   codes (+ venue); (2) run `tsx scripts/import-official-times.ts --write --sql`
+   to pull official kickoffs into `wk.ts` and emit `fix-knockouts.sql`;
+   (3) `pnpm seed:gen`; (4) apply `fix-knockouts.sql` in the Supabase SQL editor.
+   The matching is by TLA pair, so the team codes must be filled in (step 1)
+   before the script can find a round's fixtures.
 
 ## Recent history (for context across sessions)
 

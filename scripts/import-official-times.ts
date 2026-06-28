@@ -1,15 +1,43 @@
-// Open-work #5 — pull authoritative kickoff times from football-data.org and
-// compare them against the illustrative times in apps/web/src/data/wk.ts.
+// Open-work #5/#6 — pull authoritative kickoff times from football-data.org and
+// compare them against the times in apps/web/src/data/wk.ts. Covers the group
+// stage AND any RESOLVED knockout tie (both sides are real team codes, not
+// "2A"/"W73" placeholders) — the latter are matched to FD by TLA pair, so you
+// must first replace a round's placeholders with the qualified teams in wk.ts.
 //
-// Usage:
-//   FOOTBALL_DATA_API_KEY=xxxx pnpm dlx tsx scripts/import-official-times.ts
-//   (or: $env:FOOTBALL_DATA_API_KEY="xxxx"; pnpm dlx tsx scripts/import-official-times.ts)
+// Usage (default = dry run, prints a diff table, writes nothing):
+//   $env:FOOTBALL_DATA_API_KEY="xxxx"; pnpm dlx tsx scripts/import-official-times.ts
+//   ... --write   also patches date/kick back into wk.ts (group + knockouts)
+//   ... --sql     also emits supabase/seed/fix-group-kickoffs.sql (kick_at) and
+//                 supabase/seed/fix-knockouts.sql (teams + slots + kick_at)
 //
-// It does NOT write anything — it prints a diff table (current vs official,
-// in Brussels time) plus any matches it could not map, so the wk.ts edits can
-// be applied deliberately and reviewed.
+// Typical per-round flow once a round resolves: edit wk.ts to fill the round's
+// team codes, then run with `--write --sql`, then `pnpm seed:gen`, then apply
+// the emitted fix-knockouts.sql in the Supabase SQL editor.
 
-import { GROUP_STAGE, GROUPS, TEAMS } from "../apps/web/src/data/wk.ts";
+import {
+  FINAL,
+  GROUP_STAGE,
+  GROUPS,
+  QF,
+  R16,
+  R32,
+  SF,
+  TEAMS,
+  THIRD_PLACE,
+  type KnockoutTie,
+} from "../apps/web/src/data/wk.ts";
+
+// Every knockout tie, tagged with its DB stage. A tie is "resolved" once both
+// sides are real team codes; only resolved ties can be matched to FD by TLA.
+const KNOCKOUTS: { tie: KnockoutTie; stage: string }[] = [
+  ...R32.map((t) => ({ tie: t, stage: "r32" })),
+  ...R16.map((t) => ({ tie: t, stage: "r16" })),
+  ...QF.map((t) => ({ tie: t, stage: "qf" })),
+  ...SF.map((t) => ({ tie: t, stage: "sf" })),
+  { tie: THIRD_PLACE, stage: "third" },
+  { tie: FINAL, stage: "final" },
+];
+const isResolved = (t: KnockoutTie) => Boolean(TEAMS[t.left] && TEAMS[t.right]);
 
 // Our TLA -> football-data.org TLA, where they differ.
 const TLA_ALIAS: Record<string, string> = { URU: "URY" };
@@ -115,6 +143,41 @@ if (unmatched.length) {
   unmatched.forEach((u) => console.log("  " + u));
 }
 
+// ── Resolved knockout ties (placeholders already filled with team codes) ──
+const koResolved = KNOCKOUTS.filter((k) => isResolved(k.tie));
+const koOfficial = new Map<number, { date: string; kick: string }>();
+if (koResolved.length) {
+  let koChanged = 0;
+  const koUnmatched: string[] = [];
+  console.log("\nResolved knockout ties:");
+  console.log("M#   pair        current (wk.ts)      official (Brussels)   change");
+  console.log("─".repeat(74));
+  for (const { tie } of koResolved) {
+    const pair = `${tie.left}-${tie.right}`;
+    const fdM = findFd(tie.left, tie.right);
+    if (!fdM) {
+      koUnmatched.push(`M${tie.n} ${pair} (${TEAMS[tie.left]?.name} vs ${TEAMS[tie.right]?.name})`);
+      continue;
+    }
+    const off = toBrussels(fdM.utcDate);
+    koOfficial.set(tie.n, off);
+    const diff = off.date !== tie.date || off.kick !== tie.kick;
+    if (diff) koChanged++;
+    console.log(
+      `M${String(tie.n).padEnd(3)} ${pair.padEnd(10)} ${tie.date} ${tie.kick}   ` +
+        `->  ${off.date} ${off.kick}   ${diff ? "CHANGED" : ""}`,
+    );
+  }
+  console.log("─".repeat(74));
+  console.log(`${koChanged} of ${koResolved.length} resolved knockout ties differ.`);
+  if (koUnmatched.length) {
+    console.log(`\n${koUnmatched.length} resolved tie(s) could NOT be matched to football-data.org:`);
+    koUnmatched.forEach((u) => console.log("  " + u));
+  }
+} else {
+  console.log("\nNo resolved knockout ties yet (both sides still placeholders).");
+}
+
 // Build official Brussels date+kick per match number.
 const official = new Map<number, { date: string; kick: string }>();
 for (const g of GROUP_STAGE) {
@@ -133,6 +196,29 @@ if (process.argv.includes("--sql")) {
   const sqlPath = new URL("../supabase/seed/fix-group-kickoffs.sql", import.meta.url);
   writeFileSync(sqlPath, lines.join("\n") + "\n", "utf8");
   console.log(`--sql: wrote ${lines.length - 2} UPDATE statements to supabase/seed/fix-group-kickoffs.sql`);
+
+  // Knockouts: full resolution (teams + cleared slots + kick_at), like the
+  // hand-written supabase/seed/fix-r32-resolved.sql but for every resolved tie.
+  if (koResolved.length) {
+    const koLines = [
+      "-- Resolved knockout ties — teams + official kick_at (UTC), slots cleared.",
+      "-- Safe to re-run: never touches home_score / away_score / status.",
+    ];
+    for (const { tie } of koResolved) {
+      const m = findFd(tie.left, tie.right);
+      if (m) {
+        koLines.push(
+          `update matches set home_team = '${tie.left}', away_team = '${tie.right}', ` +
+            `home_slot = null, away_slot = null, kick_at = '${m.utcDate}' where id = ${tie.n};`,
+        );
+      }
+    }
+    if (koLines.length > 2) {
+      const koPath = new URL("../supabase/seed/fix-knockouts.sql", import.meta.url);
+      writeFileSync(koPath, koLines.join("\n") + "\n", "utf8");
+      console.log(`--sql: wrote ${koLines.length - 2} UPDATE statements to supabase/seed/fix-knockouts.sql`);
+    }
+  }
 }
 
 if (process.argv.includes("--write")) {
@@ -150,8 +236,23 @@ if (process.argv.includes("--write")) {
     if (src !== before) applied++;
     else console.error(`WARN: no match for M${n}`);
   }
+  let koApplied = 0;
+  for (const [n, { date, kick }] of koOfficial) {
+    // Replace date/kick in the knockout object literal
+    // `{ n: N, date: "....", kick: "..", left: ... }`.
+    const re = new RegExp(
+      `(\\{\\s*n:\\s*${n},\\s*date:\\s*)"[\\d-]+",(\\s*kick:\\s*)"[\\d:]+"`,
+    );
+    const before = src;
+    src = src.replace(re, `$1"${date}",$2"${kick}"`);
+    if (src !== before) koApplied++;
+    else console.error(`WARN: no knockout match for M${n}`);
+  }
   writeFileSync(wkPath, src, "utf8");
-  console.log(`\n--write: updated ${applied}/${official.size} GROUP_STAGE rows in wk.ts.`);
+  console.log(
+    `\n--write: updated ${applied}/${official.size} GROUP_STAGE + ` +
+      `${koApplied}/${koOfficial.size} knockout rows in wk.ts.`,
+  );
 } else {
   console.log("\n(run again with --write to apply these to wk.ts)");
 }
