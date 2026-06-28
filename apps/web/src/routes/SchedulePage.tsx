@@ -15,7 +15,7 @@ function isTab(v: string | null): v is ScheduleTab {
 export function SchedulePage() {
   const [params, setParams] = useSearchParams();
   const raw = params.get("tab");
-  const tab: ScheduleTab = isTab(raw) ? raw : "groups";
+  const tab: ScheduleTab = isTab(raw) ? raw : "bracket";
 
   const setTab = (next: ScheduleTab) => {
     const p = new URLSearchParams(params);
