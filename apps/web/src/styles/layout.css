@@ -408,6 +408,37 @@ body[data-surface="light"] { color: var(--ink); }
   padding: 14px 0 6px;
 }
 .cal-sidebar .stage-label:first-child { padding-top: 0; }
+/* Collapsible stage headers: the .stage-label is now a toggle button. */
+.cal-sidebar button.stage-label {
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.cal-sidebar button.stage-label:hover { color: rgba(255,255,255,0.9); }
+.cal-sidebar .stage-label .chev {
+  font-size: 8px;
+  width: 9px;
+  text-align: center;
+  color: rgba(255,255,255,0.45);
+}
+.cal-sidebar .stage-label .stage-name { flex: 1; text-align: left; }
+.cal-sidebar .stage-label .cnt {
+  font-size: 9px;
+  font-family: "JetBrains Mono", monospace;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
 .cal-day-btn {
   appearance: none;
   border: none;

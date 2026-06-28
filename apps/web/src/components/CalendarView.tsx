@@ -105,9 +105,39 @@ export function CalendarView() {
     return arr;
   }, [allMatches]);
 
+  // Land on today's (or the next upcoming) match day rather than 11 June.
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }, []);
+
   const [activeDate, setActiveDate] = useState<string>(
-    () => days[0]?.date ?? "2026-06-11",
+    () =>
+      days.find((d) => d.date >= todayStr)?.date ??
+      days[days.length - 1]?.date ??
+      "2026-06-11",
   );
+
+  // Each stage in the sidebar is collapsible. Collapse stages whose days are
+  // all in the past so the live rounds sit at the top — no scrolling past the
+  // 17 group-stage days to reach the Round of 32.
+  const [openStages, setOpenStages] = useState<Set<string>>(() => {
+    const open = new Set<string>();
+    for (const d of days) if (d.date >= todayStr) open.add(stageOf(d.date));
+    const landing =
+      days.find((d) => d.date >= todayStr)?.date ?? days[days.length - 1]?.date;
+    if (landing) open.add(stageOf(landing));
+    return open;
+  });
+
+  const toggleStage = (stage: string) =>
+    setOpenStages((prev) => {
+      const next = new Set(prev);
+      if (next.has(stage)) next.delete(stage);
+      else next.add(stage);
+      return next;
+    });
 
   const grouped = useMemo(() => {
     const out: Array<{ stage: string; days: typeof days }> = [];
@@ -177,21 +207,36 @@ export function CalendarView() {
       {userId && <TournamentPicks />}
       <div className="calendar">
         <div className="cal-sidebar">
-          {grouped.map((blk, i) => (
-            <Fragment key={i}>
-              <div className="stage-label">{blk.stage}</div>
-              {blk.days.map((d) => (
+          {grouped.map((blk, i) => {
+            const open = openStages.has(blk.stage);
+            return (
+              <Fragment key={i}>
                 <button
-                  key={d.date}
-                  className={`cal-day-btn ${d.date === activeDate ? "is-active" : ""}`}
-                  onClick={() => setActiveDate(d.date)}
+                  type="button"
+                  className="stage-label"
+                  onClick={() => toggleStage(blk.stage)}
+                  aria-expanded={open}
                 >
-                  <span>{fmtDate(d.date, { weekdayDay: true })}</span>
-                  <span className="cnt">{d.matches.length}</span>
+                  <span className="chev" aria-hidden="true">
+                    {open ? "▾" : "▸"}
+                  </span>
+                  <span className="stage-name">{blk.stage}</span>
+                  <span className="cnt">{blk.days.length}</span>
                 </button>
-              ))}
-            </Fragment>
-          ))}
+                {open &&
+                  blk.days.map((d) => (
+                    <button
+                      key={d.date}
+                      className={`cal-day-btn ${d.date === activeDate ? "is-active" : ""}`}
+                      onClick={() => setActiveDate(d.date)}
+                    >
+                      <span>{fmtDate(d.date, { weekdayDay: true })}</span>
+                      <span className="cnt">{d.matches.length}</span>
+                    </button>
+                  ))}
+              </Fragment>
+            );
+          })}
         </div>
         <div className="cal-day">
           {active && (
