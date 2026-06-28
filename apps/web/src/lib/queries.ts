@@ -76,12 +76,14 @@ export async function setMatchResult(
   id: number,
   home: number,
   away: number,
+  winnerTeam: string | null = null,
 ): Promise<void> {
   const { error } = await supabase
     .from("matches")
     .update({
       home_score: home,
       away_score: away,
+      winner_team: winnerTeam,
       status: "FINISHED",
       result_entered_at: new Date().toISOString(),
       result_source: "admin",
@@ -104,8 +106,9 @@ export async function setMatchResultAndScore(
   id: number,
   home: number,
   away: number,
+  winnerTeam: string | null = null,
 ): Promise<number> {
-  await setMatchResult(id, home, away);
+  await setMatchResult(id, home, away, winnerTeam);
   return scoreMatch(id);
 }
 

@@ -83,7 +83,10 @@ via the dashboard SQL editor in numbered order:
 3. `supabase/migrations/0003_tournament_picks.sql` — adds `profiles.tiebreaker_bel_goals` + `profiles.top_scorer`
 4. `supabase/migrations/0004_bonus_points.sql` — adds `profiles.bonus_points` + rebuilds `leaderboard` view (incl. match_points / bonus_points / tiebreaker columns)
 5. `supabase/migrations/0005_password_login.sql` — drops FKs to `auth.users`, adds unique `display_name`, disables RLS everywhere
-6. `supabase/seed/seed.sql` — idempotent seed of teams + venues + matches (English team names)
+6. `supabase/migrations/0006_renumber_matches.sql` — match-number renumber
+7. `supabase/migrations/0007_drop_dark_horse.sql` — removes the `dark_horse` scoring rule
+8. `supabase/migrations/0008_knockout_winner.sql` — adds `matches.winner_team` + rewrites `score_match` so knockouts score on the team that advanced (handles extra time + penalty shootouts), not `sign(home-away)`
+9. `supabase/seed/seed.sql` — idempotent seed of teams + venues + matches (English team names)
 
 After applying 0005, promote yourself to admin by **display_name** (no more auth.users):
 
@@ -194,6 +197,20 @@ ordered total.
    before the script can find a round's fixtures.
 
 ## Recent history (for context across sessions)
+
+- **2026-06-28:** Fixed knockout scoring for ties decided by extra time /
+  penalties. The cron stored only `score.fullTime` and `score_match` inferred
+  the winner from `sign(home_score-away_score)` — so a penalty shootout (level
+  fullTime) rewarded draw-predictors and gave nothing to people who picked the
+  team that advanced. Added `matches.winner_team` (migration **0008**), set by
+  the cron from football-data's `score.winner` and by the admin via a new
+  winner-picker that appears when a level knockout score is entered; rewrote the
+  `score_match` knockout branch to score against `winner_team` (falling back to
+  the score sign, with a level score then scoring nobody). Group-stage scoring
+  unchanged. Touches: `0008_knockout_winner.sql`, `api/_lib/fetch-results.ts`,
+  `lib/queries.ts`, `lib/database.types.ts`, `routes/AdminPage.tsx`. **Apply
+  0008 in the Supabase SQL editor + redeploy** for the cron change to take
+  effect.
 
 - **2026-06-28:** Group stage done, bracket resolved. Replaced the 16 R32
   placeholders in `wk.ts` (`R32`) — `2A`, `1E`, `3C/D/F/G/H`, … — with the

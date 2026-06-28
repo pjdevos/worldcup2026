@@ -62,6 +62,11 @@ function AdminMatchRow({ match }: { match: DbMatch }) {
   const qc = useQueryClient();
   const [home, setHome] = useState<string>(match.home_score?.toString() ?? "");
   const [away, setAway] = useState<string>(match.away_score?.toString() ?? "");
+  const [winner, setWinner] = useState<string>(match.winner_team ?? "");
+
+  const isKnockout = match.stage !== "group";
+  const levelKnockout =
+    isKnockout && home !== "" && away !== "" && Number(home) === Number(away);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -70,7 +75,18 @@ function AdminMatchRow({ match }: { match: DbMatch }) {
       if (!Number.isInteger(h) || !Number.isInteger(a) || h < 0 || a < 0) {
         throw new Error("Enter both scores (whole numbers ≥ 0).");
       }
-      return setMatchResultAndScore(match.id, h, a);
+      // Knockouts can't end level: when the score is a draw, the admin must say
+      // who advanced (ET/penalties). A decisive score implies the winner.
+      let winnerTeam: string | null = null;
+      if (isKnockout) {
+        if (h > a) winnerTeam = match.home_team;
+        else if (a > h) winnerTeam = match.away_team;
+        else {
+          if (!winner) throw new Error("Pick who advanced (level score → ET/penalties).");
+          winnerTeam = winner;
+        }
+      }
+      return setMatchResultAndScore(match.id, h, a, winnerTeam);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["matches"] });
@@ -103,6 +119,24 @@ function AdminMatchRow({ match }: { match: DbMatch }) {
           M{match.id} · {match.stage === "group" ? `Group ${match.group_id}` : match.stage.toUpperCase()}
           {overdue && <span style={{ color: "var(--fari-mint)", marginLeft: 8 }}>● played?</span>}
         </span>
+        {levelKnockout && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
+            <span style={{ fontSize: 10, opacity: 0.7 }}>Advanced (ET/pens):</span>
+            {([match.home_team, match.away_team] as const).map((code) =>
+              code ? (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setWinner(code)}
+                  className={`tab ${winner === code ? "is-active" : ""}`}
+                  style={{ padding: "3px 10px", fontSize: 11 }}
+                >
+                  {code}
+                </button>
+              ) : null,
+            )}
+          </div>
+        )}
       </div>
       <ScoreInput value={home} onChange={setHome} />
       <span style={{ textAlign: "center", opacity: 0.5 }}>–</span>
@@ -110,7 +144,12 @@ function AdminMatchRow({ match }: { match: DbMatch }) {
       <div>
         <button
           type="button"
-          disabled={save.isPending || home === "" || away === ""}
+          disabled={
+            save.isPending ||
+            home === "" ||
+            away === "" ||
+            (levelKnockout && !winner)
+          }
           onClick={() => save.mutate()}
           className="tab is-active"
           style={{

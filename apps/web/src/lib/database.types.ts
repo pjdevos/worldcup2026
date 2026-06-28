@@ -41,6 +41,7 @@ export interface DbMatch {
   away_slot: string | null;
   home_score: number | null;
   away_score: number | null;
+  winner_team: string | null;
   status: MatchStatus;
   external_id: string | null;
   result_entered_at: string | null;

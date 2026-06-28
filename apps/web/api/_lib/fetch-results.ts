@@ -150,11 +150,21 @@ export async function runFetchResults(): Promise<FetchSummary> {
     const home = fd.score.fullTime.home as number;
     const away = fd.score.fullTime.away as number;
 
+    // The team that advanced — authoritative for knockouts (covers extra time
+    // and penalty shootouts, where fullTime is level). Null for draws/groups.
+    const winnerTeam =
+      fd.score.winner === "HOME_TEAM"
+        ? match.home_team
+        : fd.score.winner === "AWAY_TEAM"
+          ? match.away_team
+          : null;
+
     const { error: upErr } = await supabase
       .from("matches")
       .update({
         home_score: home,
         away_score: away,
+        winner_team: winnerTeam,
         status: "FINISHED",
         external_id: fd.id.toString(),
         result_entered_at: new Date().toISOString(),
