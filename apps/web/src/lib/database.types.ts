@@ -65,6 +65,7 @@ export interface DbPrediction {
   match_id: number;
   home_score: number;
   away_score: number;
+  advance_team: string | null;
   points: number | null;
   locked_at: string | null;
   created_at: string;

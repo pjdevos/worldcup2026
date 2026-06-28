@@ -86,7 +86,8 @@ via the dashboard SQL editor in numbered order:
 6. `supabase/migrations/0006_renumber_matches.sql` — match-number renumber
 7. `supabase/migrations/0007_drop_dark_horse.sql` — removes the `dark_horse` scoring rule
 8. `supabase/migrations/0008_knockout_winner.sql` — adds `matches.winner_team` + rewrites `score_match` so knockouts score on the team that advanced (handles extra time + penalty shootouts), not `sign(home-away)`
-9. `supabase/seed/seed.sql` — idempotent seed of teams + venues + matches (English team names)
+9. `supabase/migrations/0009_predict_advance.sql` — adds `predictions.advance_team` (penalty pick for a level knockout prediction) + rewrites `score_match` knockout branch to score the predicted advancer vs `winner_team`. Requires 0008.
+10. `supabase/seed/seed.sql` — idempotent seed of teams + venues + matches (English team names)
 
 After applying 0005, promote yourself to admin by **display_name** (no more auth.users):
 
@@ -197,6 +198,16 @@ ordered total.
    before the script can find a round's fixtures.
 
 ## Recent history (for context across sessions)
+
+- **2026-06-28:** Let users predict a level knockout score and pick who
+  advances on penalties. Migration **0009** adds `predictions.advance_team`;
+  `score_match`'s knockout branch now scores the user's predicted advancer (the
+  higher-scored side, or `advance_team` when level) against `matches.winner_team`.
+  A "Door na pen." home/away picker appears in [`MatchRow`](apps/web/src/components/MatchRow.tsx)
+  only when an editable knockout score is level; it saves immediately (the
+  scores stay debounced). `upsertPrediction` + `DbPrediction` carry
+  `advance_team`. A correct "1-1, Belgium on pens" pockets `final_winner` **and**
+  the exact-score bonus (deliberate). **Apply 0009 (after 0008) + redeploy.**
 
 - **2026-06-28:** Fixed knockout scoring for ties decided by extra time /
   penalties. The cron stored only `score.fullTime` and `score_match` inferred

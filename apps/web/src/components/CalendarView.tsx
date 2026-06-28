@@ -173,13 +173,15 @@ export function CalendarView() {
       matchId,
       home,
       away,
+      advanceTeam,
     }: {
       matchId: number;
       home: number;
       away: number;
+      advanceTeam: string | null;
     }) => {
       if (!userId) throw new Error("Niet ingelogd");
-      await upsertPrediction(userId, matchId, home, away);
+      await upsertPrediction(userId, matchId, home, away, advanceTeam);
     },
     onSuccess: () => {
       void qc.invalidateQueries({
@@ -269,8 +271,8 @@ export function CalendarView() {
                       match={m}
                       prediction={prediction}
                       editable={editable}
-                      onSave={(matchId, home, away) =>
-                        saveMutation.mutate({ matchId, home, away })
+                      onSave={(matchId, home, away, advanceTeam) =>
+                        saveMutation.mutate({ matchId, home, away, advanceTeam })
                       }
                     />
                   );

@@ -23,7 +23,12 @@ export interface MatchRowProps {
   /** Allow editing the scores inline. Pre-kickoff + logged-in only. */
   editable?: boolean;
   /** Called when the user changes their prediction (debounced upstream). */
-  onSave?: (matchId: number, home: number, away: number) => void;
+  onSave?: (
+    matchId: number,
+    home: number,
+    away: number,
+    advanceTeam: string | null,
+  ) => void;
   /** When true, render the actual result (final score) read-only. */
   finishedHome?: number | null;
   finishedAway?: number | null;
@@ -165,6 +170,26 @@ const stepperBtn: React.CSSProperties = {
   padding: 0,
 };
 
+const advanceBtn: React.CSSProperties = {
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid var(--line-soft)",
+  borderRadius: 6,
+  padding: "2px 9px",
+  cursor: "pointer",
+  color: "white",
+  font: "inherit",
+  fontFamily: "JetBrains Mono, monospace",
+  fontSize: 11,
+  fontWeight: 700,
+  lineHeight: 1.4,
+};
+
+const advanceBtnActive: React.CSSProperties = {
+  background: DOT_GOLD,
+  color: "#1a1a1a",
+  borderColor: DOT_GOLD,
+};
+
 export function MatchRow({
   match,
   prediction,
@@ -175,34 +200,55 @@ export function MatchRow({
 }: MatchRowProps) {
   const isBel = match.home === "BEL" || match.away === "BEL";
   const isFinished = finishedHome != null && finishedAway != null;
+  const isKnockout = match.stage != null && match.stage !== "group";
 
   // Local optimistic state for the stepper.
   const [home, setHome] = useState<number>(prediction?.home_score ?? 0);
   const [away, setAway] = useState<number>(prediction?.away_score ?? 0);
+  // Knockout penalty pick: who advances when the predicted score is level.
+  const [advanceTeam, setAdvanceTeam] = useState<string | null>(
+    prediction?.advance_team ?? null,
+  );
 
   // Sync external prediction prop changes back into local state when the
   // saved row differs (e.g., another tab edited it, or initial load).
+  const advanceRef = useRef<string | null>(prediction?.advance_team ?? null);
   useEffect(() => {
     setHome(prediction?.home_score ?? 0);
     setAway(prediction?.away_score ?? 0);
-  }, [prediction?.id, prediction?.home_score, prediction?.away_score]);
+    setAdvanceTeam(prediction?.advance_team ?? null);
+    advanceRef.current = prediction?.advance_team ?? null;
+  }, [
+    prediction?.id,
+    prediction?.home_score,
+    prediction?.away_score,
+    prediction?.advance_team,
+  ]);
 
   // Debounced save: 600ms after the last change.
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSavedRef = useRef<{ h: number; a: number } | null>(
-    prediction ? { h: prediction.home_score, a: prediction.away_score } : null,
+  const lastSavedRef = useRef<{ h: number; a: number; adv: string | null } | null>(
+    prediction
+      ? {
+          h: prediction.home_score,
+          a: prediction.away_score,
+          adv: prediction.advance_team,
+        }
+      : null,
   );
 
   function bump(next: { h: number; a: number }) {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
+      const adv = advanceRef.current;
       if (
         !lastSavedRef.current ||
         lastSavedRef.current.h !== next.h ||
-        lastSavedRef.current.a !== next.a
+        lastSavedRef.current.a !== next.a ||
+        lastSavedRef.current.adv !== adv
       ) {
-        lastSavedRef.current = next;
-        if (match.id != null && onSave) onSave(match.id, next.h, next.a);
+        lastSavedRef.current = { ...next, adv };
+        if (match.id != null && onSave) onSave(match.id, next.h, next.a, adv);
       }
     }, 600);
   }
@@ -216,21 +262,36 @@ export function MatchRow({
     bump({ h: home, a: v });
   }
 
-  // Decide which side gets the gold "predicted winner" dot.
+  // The penalty pick is a discrete choice — save it immediately (no debounce).
+  function pickAdvance(code: string) {
+    setAdvanceTeam(code);
+    advanceRef.current = code;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    lastSavedRef.current = { h: home, a: away, adv: code };
+    if (match.id != null && onSave) onSave(match.id, home, away, code);
+  }
+
+  // Which side gets the gold "predicted winner" dot. A decisive score wins;
+  // a level knockout prediction defers to the penalty pick.
+  function sideFor(
+    h: number,
+    a: number,
+    adv: string | null,
+  ): "home" | "away" | null {
+    if (h > a) return "home";
+    if (a > h) return "away";
+    if (isKnockout && adv) {
+      if (adv === match.home) return "home";
+      if (adv === match.away) return "away";
+    }
+    return null;
+  }
   const winnerSide: "home" | "away" | null = isFinished
     ? null // no dot needed once result is in
-    : prediction
-    ? prediction.home_score > prediction.away_score
-      ? "home"
-      : prediction.away_score > prediction.home_score
-      ? "away"
-      : null
     : editable
-    ? home > away
-      ? "home"
-      : away > home
-      ? "away"
-      : null
+    ? sideFor(home, away, advanceTeam)
+    : prediction
+    ? sideFor(prediction.home_score, prediction.away_score, prediction.advance_team)
     : null;
 
   return (
@@ -267,20 +328,60 @@ export function MatchRow({
             {finishedHome}–{finishedAway}
           </span>
         ) : editable ? (
-          <>
-            <Stepper value={home} onChange={changeHome} />
-            <span
-              style={{
-                fontSize: 10,
-                letterSpacing: "0.14em",
-                color: "rgba(255,255,255,0.45)",
-                textTransform: "uppercase",
-              }}
-            >
-              vs
-            </span>
-            <Stepper value={away} onChange={changeAway} />
-          </>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <Stepper value={home} onChange={changeHome} />
+              <span
+                style={{
+                  fontSize: 10,
+                  letterSpacing: "0.14em",
+                  color: "rgba(255,255,255,0.45)",
+                  textTransform: "uppercase",
+                }}
+              >
+                vs
+              </span>
+              <Stepper value={away} onChange={changeAway} />
+            </div>
+            {isKnockout && home === away && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span
+                  style={{
+                    fontSize: 9,
+                    letterSpacing: "0.1em",
+                    color: "rgba(255,255,255,0.5)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Door na pen.
+                </span>
+                {[match.home, match.away].map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      pickAdvance(code);
+                    }}
+                    style={{
+                      ...advanceBtn,
+                      ...(advanceTeam === code ? advanceBtnActive : null),
+                    }}
+                  >
+                    {TEAMS[code]?.code ?? code}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         ) : prediction ? (
           <span
             style={{
@@ -291,6 +392,13 @@ export function MatchRow({
             }}
           >
             🔒 {prediction.home_score}–{prediction.away_score}
+            {isKnockout &&
+              prediction.home_score === prediction.away_score &&
+              prediction.advance_team && (
+                <span style={{ marginLeft: 6, fontSize: 13, color: DOT_GOLD }}>
+                  → {prediction.advance_team}
+                </span>
+              )}
           </span>
         ) : (
           <span className="vs">vs</span>

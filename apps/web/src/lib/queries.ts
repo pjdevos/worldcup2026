@@ -143,6 +143,7 @@ export async function upsertPrediction(
   matchId: number,
   homeScore: number,
   awayScore: number,
+  advanceTeam: string | null = null,
 ): Promise<void> {
   const { error } = await supabase
     .from("predictions")
@@ -152,6 +153,7 @@ export async function upsertPrediction(
         match_id: matchId,
         home_score: homeScore,
         away_score: awayScore,
+        advance_team: advanceTeam,
       },
       { onConflict: "user_id,match_id" },
     );
