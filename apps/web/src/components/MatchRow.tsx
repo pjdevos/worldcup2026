@@ -360,7 +360,7 @@ export function MatchRow({
                     textTransform: "uppercase",
                   }}
                 >
-                  Door na pen.
+                  Through after pen.
                 </span>
                 {[match.home, match.away].map((code) => (
                   <button

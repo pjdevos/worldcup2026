@@ -203,7 +203,7 @@ ordered total.
   advances on penalties. Migration **0009** adds `predictions.advance_team`;
   `score_match`'s knockout branch now scores the user's predicted advancer (the
   higher-scored side, or `advance_team` when level) against `matches.winner_team`.
-  A "Door na pen." home/away picker appears in [`MatchRow`](apps/web/src/components/MatchRow.tsx)
+  A "Through after pen." home/away picker appears in [`MatchRow`](apps/web/src/components/MatchRow.tsx)
   only when an editable knockout score is level; it saves immediately (the
   scores stay debounced). `upsertPrediction` + `DbPrediction` carry
   `advance_team`. A correct "1-1, Belgium on pens" pockets `final_winner` **and**
