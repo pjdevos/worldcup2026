@@ -216,23 +216,27 @@ export const GROUP_STAGE: GroupMatch[] = [
   m( 72, "K", "2026-06-28", "01:30", 2, 3, "GEHA Field, Kansas City"),
 ];
 
+// Round of 32 — RESOLVED after the group stage (2026-06-28). The `left`/`right`
+// placeholders (2A, 1E, 3C/D/F/G/H, …) have been replaced with the actual
+// qualified teams; dates, kickoff times (Brussels-CEST = UTC+2) and venues are
+// the official FIFA schedule. R16+ stay as W## placeholders until they resolve.
 export const R32: KnockoutTie[] = [
-  { n: 73, date: "2026-06-28", kick: "21:00", left: "2A", right: "2B", venue: "SoFi Stadium, Los Angeles" },
-  { n: 74, date: "2026-06-29", kick: "19:00", left: "1E", right: "3A/B/C/D/F", venue: "Lincoln Financial, Philadelphia" },
-  { n: 75, date: "2026-06-29", kick: "22:30", left: "1F", right: "2C", venue: "Estadio BBVA, Monterrey" },
-  { n: 76, date: "2026-06-30", kick: "03:00", left: "1C", right: "2F", venue: "NRG Stadium, Houston" },
-  { n: 77, date: "2026-06-30", kick: "19:00", left: "1I", right: "3C/D/F/G/H", venue: "MetLife, New York/New Jersey" },
-  { n: 78, date: "2026-06-30", kick: "23:00", left: "2E", right: "2I", venue: "AT&T Stadium, Dallas" },
-  { n: 79, date: "2026-07-01", kick: "03:00", left: "1A", right: "3C/E/F/H/I", venue: "Estadio Banorte, Mexico-Stad" },
-  { n: 80, date: "2026-07-01", kick: "18:00", left: "1L", right: "3E/H/I/J/K", venue: "Mercedes-Benz, Atlanta" },
-  { n: 81, date: "2026-07-02", kick: "22:00", left: "1D", right: "3B/E/F/I/J", venue: "Levi's Stadium, San Francisco Bay" },
-  { n: 82, date: "2026-07-03", kick: "02:00", left: "1G", right: "3A/E/H/I/J", venue: "Lumen Field, Seattle" },
-  { n: 83, date: "2026-07-03", kick: "21:00", left: "2K", right: "2L", venue: "BMO Field, Toronto" },
-  { n: 84, date: "2026-07-03", kick: "01:00", left: "1H", right: "2J", venue: "SoFi Stadium, Los Angeles" },
-  { n: 85, date: "2026-07-03", kick: "05:00", left: "1B", right: "3E/F/G/I/J", venue: "BC Place, Vancouver" },
-  { n: 86, date: "2026-07-04", kick: "20:00", left: "1J", right: "2H", venue: "Hard Rock Stadium, Miami" },
-  { n: 87, date: "2026-07-04", kick: "00:00", left: "1K", right: "3D/E/I/J/L", venue: "GEHA Field, Kansas City" },
-  { n: 88, date: "2026-07-04", kick: "03:30", left: "2D", right: "2G", venue: "AT&T Stadium, Dallas" },
+  { n: 73, date: "2026-06-28", kick: "21:00", left: "RSA", right: "CAN", venue: "SoFi Stadium, Los Angeles" },
+  { n: 74, date: "2026-06-29", kick: "22:30", left: "GER", right: "PAR", venue: "Gillette Stadium, Boston" },
+  { n: 75, date: "2026-06-30", kick: "03:00", left: "NED", right: "MAR", venue: "Estadio BBVA, Monterrey" },
+  { n: 76, date: "2026-06-29", kick: "19:00", left: "BRA", right: "JPN", venue: "NRG Stadium, Houston" },
+  { n: 77, date: "2026-06-30", kick: "23:00", left: "FRA", right: "SWE", venue: "MetLife, New York/New Jersey" },
+  { n: 78, date: "2026-06-30", kick: "19:00", left: "CIV", right: "NOR", venue: "AT&T Stadium, Dallas" },
+  { n: 79, date: "2026-07-01", kick: "03:00", left: "MEX", right: "ECU", venue: "Estadio Banorte, Mexico-Stad" },
+  { n: 80, date: "2026-07-01", kick: "18:00", left: "ENG", right: "COD", venue: "Mercedes-Benz, Atlanta" },
+  { n: 81, date: "2026-07-02", kick: "02:00", left: "USA", right: "BIH", venue: "Levi's Stadium, San Francisco Bay" },
+  { n: 82, date: "2026-07-01", kick: "22:00", left: "BEL", right: "SEN", venue: "Lumen Field, Seattle" },
+  { n: 83, date: "2026-07-03", kick: "01:00", left: "POR", right: "CRO", venue: "BMO Field, Toronto" },
+  { n: 84, date: "2026-07-02", kick: "21:00", left: "ESP", right: "AUT", venue: "SoFi Stadium, Los Angeles" },
+  { n: 85, date: "2026-07-03", kick: "05:00", left: "SUI", right: "ALG", venue: "BC Place, Vancouver" },
+  { n: 86, date: "2026-07-04", kick: "00:00", left: "ARG", right: "CPV", venue: "Hard Rock Stadium, Miami" },
+  { n: 87, date: "2026-07-04", kick: "03:30", left: "COL", right: "GHA", venue: "GEHA Field, Kansas City" },
+  { n: 88, date: "2026-07-03", kick: "20:00", left: "AUS", right: "EGY", venue: "AT&T Stadium, Dallas" },
 ];
 
 export const R16: KnockoutTie[] = [

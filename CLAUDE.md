@@ -181,14 +181,31 @@ ordered total.
    date+kick into `wk.ts`; `--sql` emits `supabase/seed/fix-group-kickoffs.sql`.
    Group stage done; knockout ties still illustrative (no resolved teams yet —
    re-run after the draw resolves).
-6. **Knockout kickoff times still illustrative** — only the 72 group matches
-   were corrected to official times. The knockout ties (R32–Final) in `wk.ts`
-   keep their placeholder Brussels times and have the same US-date/Brussels-kick
-   gluing bug. Once the bracket teams resolve (after 27 June), re-run
-   `scripts/import-official-times.ts` (extend it to cover the knockout arrays)
-   then apply the regenerated `fix-group-kickoffs.sql`-style update to the DB.
+6. **R16–Final kickoff times still illustrative** — the 72 group matches and
+   now the 16 **R32** ties carry official times (R32 resolved 2026-06-28, see
+   history). The later rounds (R16/QF/SF/3rd/Final) in `wk.ts` keep `W##`
+   placeholders and illustrative Brussels times. As each round resolves, replace
+   the `W##`/`V##` placeholders in the relevant `wk.ts` array with the actual
+   team codes + official date/kick/venue, run `pnpm seed:gen`, and apply a
+   `fix-r32-resolved.sql`-style DB delta (sets teams + `kick_at`, clears slots).
 
 ## Recent history (for context across sessions)
+
+- **2026-06-28:** Group stage done, bracket resolved. Replaced the 16 R32
+  placeholders in `wk.ts` (`R32`) — `2A`, `1E`, `3C/D/F/G/H`, … — with the
+  actual qualified team codes, and corrected their dates/kickoffs (Brussels) +
+  venues to the official FIFA schedule (cross-checked Wikipedia + Al Jazeera;
+  the live `import-official-times.ts` path was unavailable — no local
+  `.env.local`/API key + `pnpm`). Several had drifted by up to a full day
+  (e.g. n82 BEL–SEN Jul 3 → Jul 1; n74 venue Philadelphia → Boston). Because
+  `CalendarView` reads `wk.ts` directly, this both shows real R32 fixtures and
+  makes R32 predictions editable (gated on `TEAMS[m.home] && TEAMS[m.away]`).
+  Extended `seed/generate.ts` so a resolved knockout side (a real team code)
+  emits `home_team`/`away_team` instead of a slot; regenerated `seed.sql`. DB
+  delta for the live hosted Supabase: **`supabase/seed/fix-r32-resolved.sql`**
+  (matches 73–88, sets teams + `kick_at`, clears slots, leaves scores/status).
+  The cron matches FD fixtures by home/away TLA pair + UTC date, so R32 results
+  now auto-score with no `external_id` mapping. R16+ still illustrative (#6).
 
 - **2026-06-15:** Replaced the illustrative group-stage kickoff times with
   official ones from football-data.org (see open-work #5). The old data glued a

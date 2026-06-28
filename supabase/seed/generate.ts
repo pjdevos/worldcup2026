@@ -51,9 +51,14 @@ const groupMatchRows = GROUP_STAGE.map(
 
 const knockoutRows = (() => {
   const rows: string[] = [];
+  // A knockout side is either a placeholder ("2A", "W73", "3C/D/F/G/H") or,
+  // once the tie resolves, a real team code that exists in TEAMS. Resolved
+  // sides go into home_team/away_team; unresolved ones into home_slot/away_slot.
+  const teamCol = (side: string) => (TEAMS[side] ? `'${side}'` : "null");
+  const slotCol = (side: string) => (TEAMS[side] ? "null" : `'${esc(side)}'`);
   const add = (t: KnockoutTie, stage: string) => {
     rows.push(
-      `(${t.n}, '${stage}', null, '${toIsoUtc(t.date, t.kick)}', null, null, '${esc(t.left)}', '${esc(t.right)}')`,
+      `(${t.n}, '${stage}', null, '${toIsoUtc(t.date, t.kick)}', ${teamCol(t.left)}, ${teamCol(t.right)}, ${slotCol(t.left)}, ${slotCol(t.right)})`,
     );
   };
   R32.forEach((t) => add(t, "r32"));
