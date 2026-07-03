@@ -227,7 +227,7 @@ export const R32: KnockoutTie[] = [
   { n: 76, date: "2026-06-29", kick: "19:00", left: "BRA", right: "JPN", venue: "NRG Stadium, Houston" },
   { n: 77, date: "2026-06-30", kick: "23:00", left: "FRA", right: "SWE", venue: "MetLife, New York/New Jersey" },
   { n: 78, date: "2026-06-30", kick: "19:00", left: "CIV", right: "NOR", venue: "AT&T Stadium, Dallas" },
-  { n: 79, date: "2026-07-01", kick: "03:00", left: "MEX", right: "ECU", venue: "Estadio Banorte, Mexico-Stad" },
+  { n: 79, date: "2026-07-01", kick: "04:00", left: "MEX", right: "ECU", venue: "Estadio Banorte, Mexico-Stad" },
   { n: 80, date: "2026-07-01", kick: "18:00", left: "ENG", right: "COD", venue: "Mercedes-Benz, Atlanta" },
   { n: 81, date: "2026-07-02", kick: "02:00", left: "USA", right: "BIH", venue: "Levi's Stadium, San Francisco Bay" },
   { n: 82, date: "2026-07-01", kick: "22:00", left: "BEL", right: "SEN", venue: "Lumen Field, Seattle" },
@@ -240,12 +240,16 @@ export const R32: KnockoutTie[] = [
 ];
 
 export const R16: KnockoutTie[] = [
-  { n: 89, date: "2026-07-04", kick: "23:00", left: "W74", right: "W77", venue: "Lincoln Financial, Philadelphia" },
-  { n: 90, date: "2026-07-05", kick: "22:00", left: "W73", right: "W75", venue: "NRG Stadium, Houston" },
-  { n: 91, date: "2026-07-06", kick: "02:00", left: "W76", right: "W78", venue: "MetLife, New York/New Jersey" },
-  { n: 92, date: "2026-07-06", kick: "21:00", left: "W79", right: "W80", venue: "Estadio Banorte, Mexico-Stad" },
+  // R16 resolved from official R32 results (football-data.org, 2026-07-03).
+  // n=93/95/96 stay as W## placeholders until the AUS-EGY / ARG-CPV / COL-GHA
+  // R32 ties are played — the app bracket structure doesn't match FIFA's for
+  // those, so they're filled from football-data once resolved.
+  { n: 89, date: "2026-07-04", kick: "23:00", left: "PAR", right: "FRA", venue: "Lincoln Financial, Philadelphia" },
+  { n: 90, date: "2026-07-04", kick: "19:00", left: "CAN", right: "MAR", venue: "NRG Stadium, Houston" },
+  { n: 91, date: "2026-07-05", kick: "22:00", left: "BRA", right: "NOR", venue: "MetLife, New York/New Jersey" },
+  { n: 92, date: "2026-07-06", kick: "02:00", left: "MEX", right: "ENG", venue: "Estadio Banorte, Mexico-Stad" },
   { n: 93, date: "2026-07-07", kick: "02:00", left: "W83", right: "W84", venue: "Gillette Stadium, Boston" },
-  { n: 94, date: "2026-07-07", kick: "18:00", left: "W81", right: "W82", venue: "Lumen Field, Seattle" },
+  { n: 94, date: "2026-07-07", kick: "02:00", left: "USA", right: "BEL", venue: "Lumen Field, Seattle" },
   { n: 95, date: "2026-07-07", kick: "22:00", left: "W86", right: "W88", venue: "Mercedes-Benz, Atlanta" },
   { n: 96, date: "2026-07-07", kick: "01:00", left: "W85", right: "W87", venue: "BC Place, Vancouver" },
 ];
