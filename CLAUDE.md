@@ -199,12 +199,14 @@ ordered total.
 
 ## Recent history (for context across sessions)
 
+- **2026-07-04:** Full R16 now open for predictions. After all R32 finished,
+  football-data's LAST_16 resolved the last 3 ties as n=93 POR-ESP, 95 ARG-EGY,
+  96 SUI-COL — which happens to match our `W##` links after all (the earlier
+  "bracket mismatch" was just football-data not having propagated the pairings
+  yet). All 8 R16 ties carry real teams + official kickoffs in `wk.ts`; DB via
+  `fix-knockouts.sql` (24 rows: R32 + R16). n=92 MEX-ENG shifted to 01:00 UTC.
 - **2026-07-03:** Opened the 5 R16 ties fixed by finished R32 results (n=89
-  PAR-FRA, 90 CAN-MAR, 91 BRA-NOR, 92 MEX-ENG, 94 USA-BEL) for predictions —
-  teams + official kickoffs in `wk.ts`, DB via `fix-knockouts.sql`. n=93/95/96
-  wait on AUS-EGY / ARG-CPV / COL-GHA; **do not** fill them from the `W##`
-  links (the app bracket doesn't match FIFA's — POR/ESP/SUI each face one of
-  ARG/COL/EGY in separate ties). Resolve from football-data's LAST_16 once played.
+  PAR-FRA, 90 CAN-MAR, 91 BRA-NOR, 92 MEX-ENG, 94 USA-BEL) for predictions.
 - **2026-06-28:** Let users predict a level knockout score and pick who
   advances on penalties. Migration **0009** adds `predictions.advance_team`;
   `score_match`'s knockout branch now scores the user's predicted advancer (the
