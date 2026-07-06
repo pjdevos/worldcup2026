@@ -240,18 +240,15 @@ export const R32: KnockoutTie[] = [
 ];
 
 export const R16: KnockoutTie[] = [
-  // R16 resolved from official R32 results (football-data.org, 2026-07-03).
-  // n=93/95/96 stay as W## placeholders until the AUS-EGY / ARG-CPV / COL-GHA
-  // R32 ties are played — the app bracket structure doesn't match FIFA's for
-  // those, so they're filled from football-data once resolved.
+  // R16 fully resolved from official R32 results (football-data.org, 2026-07-04).
   { n: 89, date: "2026-07-04", kick: "23:00", left: "PAR", right: "FRA", venue: "Lincoln Financial, Philadelphia" },
   { n: 90, date: "2026-07-04", kick: "19:00", left: "CAN", right: "MAR", venue: "NRG Stadium, Houston" },
   { n: 91, date: "2026-07-05", kick: "22:00", left: "BRA", right: "NOR", venue: "MetLife, New York/New Jersey" },
-  { n: 92, date: "2026-07-06", kick: "02:00", left: "MEX", right: "ENG", venue: "Estadio Banorte, Mexico-Stad" },
-  { n: 93, date: "2026-07-07", kick: "02:00", left: "W83", right: "W84", venue: "Gillette Stadium, Boston" },
+  { n: 92, date: "2026-07-06", kick: "03:00", left: "MEX", right: "ENG", venue: "Estadio Banorte, Mexico-Stad" },
+  { n: 93, date: "2026-07-06", kick: "21:00", left: "POR", right: "ESP", venue: "Gillette Stadium, Boston" },
   { n: 94, date: "2026-07-07", kick: "02:00", left: "USA", right: "BEL", venue: "Lumen Field, Seattle" },
-  { n: 95, date: "2026-07-07", kick: "22:00", left: "W86", right: "W88", venue: "Mercedes-Benz, Atlanta" },
-  { n: 96, date: "2026-07-07", kick: "01:00", left: "W85", right: "W87", venue: "BC Place, Vancouver" },
+  { n: 95, date: "2026-07-07", kick: "18:00", left: "ARG", right: "EGY", venue: "Mercedes-Benz, Atlanta" },
+  { n: 96, date: "2026-07-07", kick: "22:00", left: "SUI", right: "COL", venue: "BC Place, Vancouver" },
 ];
 
 export const QF: KnockoutTie[] = [
