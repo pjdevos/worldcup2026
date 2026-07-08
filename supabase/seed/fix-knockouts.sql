@@ -24,3 +24,7 @@ update matches set home_team = 'POR', away_team = 'ESP', home_slot = null, away_
 update matches set home_team = 'USA', away_team = 'BEL', home_slot = null, away_slot = null, kick_at = '2026-07-07T00:00:00Z' where id = 94;
 update matches set home_team = 'ARG', away_team = 'EGY', home_slot = null, away_slot = null, kick_at = '2026-07-07T16:00:00Z' where id = 95;
 update matches set home_team = 'SUI', away_team = 'COL', home_slot = null, away_slot = null, kick_at = '2026-07-07T20:00:00Z' where id = 96;
+update matches set home_team = 'FRA', away_team = 'MAR', home_slot = null, away_slot = null, kick_at = '2026-07-09T20:00:00Z' where id = 97;
+update matches set home_team = 'ESP', away_team = 'BEL', home_slot = null, away_slot = null, kick_at = '2026-07-10T19:00:00Z' where id = 98;
+update matches set home_team = 'NOR', away_team = 'ENG', home_slot = null, away_slot = null, kick_at = '2026-07-11T21:00:00Z' where id = 99;
+update matches set home_team = 'ARG', away_team = 'SUI', home_slot = null, away_slot = null, kick_at = '2026-07-12T01:00:00Z' where id = 100;

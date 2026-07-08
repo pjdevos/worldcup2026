@@ -252,10 +252,11 @@ export const R16: KnockoutTie[] = [
 ];
 
 export const QF: KnockoutTie[] = [
-  { n: 97, date: "2026-07-09", kick: "22:00", left: "W89", right: "W90", venue: "Gillette Stadium, Boston" },
-  { n: 98, date: "2026-07-10", kick: "02:00", left: "W93", right: "W94", venue: "SoFi Stadium, Los Angeles" },
-  { n: 99, date: "2026-07-10", kick: "21:00", left: "W91", right: "W92", venue: "Hard Rock Stadium, Miami" },
-  { n: 100, date: "2026-07-11", kick: "03:00", left: "W95", right: "W96", venue: "AT&T Stadium, Dallas" },
+  // QF resolved from official R16 results (football-data.org, 2026-07-08).
+  { n: 97, date: "2026-07-09", kick: "22:00", left: "FRA", right: "MAR", venue: "Gillette Stadium, Boston" },
+  { n: 98, date: "2026-07-10", kick: "21:00", left: "ESP", right: "BEL", venue: "SoFi Stadium, Los Angeles" },
+  { n: 99, date: "2026-07-11", kick: "23:00", left: "NOR", right: "ENG", venue: "Hard Rock Stadium, Miami" },
+  { n: 100, date: "2026-07-12", kick: "03:00", left: "ARG", right: "SUI", venue: "AT&T Stadium, Dallas" },
 ];
 
 export const SF: KnockoutTie[] = [
