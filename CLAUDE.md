@@ -199,6 +199,10 @@ ordered total.
 
 ## Recent history (for context across sessions)
 
+- **2026-07-08:** Quarter-finals opened for predictions after all R16 played.
+  n=97 FRA-MAR, 98 ESP-BEL, 99 NOR-ENG, 100 ARG-SUI (football-data
+  QUARTER_FINALS; matches our `W##` links). Teams + official kickoffs in
+  `wk.ts`; DB via `fix-knockouts.sql` (28 rows: R32+R16+QF).
 - **2026-07-04:** Full R16 now open for predictions. After all R32 finished,
   football-data's LAST_16 resolved the last 3 ties as n=93 POR-ESP, 95 ARG-EGY,
   96 SUI-COL — which happens to match our `W##` links after all (the earlier
