@@ -260,8 +260,9 @@ export const QF: KnockoutTie[] = [
 ];
 
 export const SF: KnockoutTie[] = [
-  { n: 101, date: "2026-07-14", kick: "21:00", left: "W97", right: "W98", venue: "AT&T Stadium, Dallas" },
-  { n: 102, date: "2026-07-15", kick: "21:00", left: "W99", right: "W100", venue: "Mercedes-Benz, Atlanta" },
+  // SF resolved from official QF results (football-data.org, 2026-07-12).
+  { n: 101, date: "2026-07-14", kick: "21:00", left: "FRA", right: "ESP", venue: "AT&T Stadium, Dallas" },
+  { n: 102, date: "2026-07-15", kick: "21:00", left: "ENG", right: "ARG", venue: "Mercedes-Benz, Atlanta" },
 ];
 
 export const THIRD_PLACE: KnockoutTie = {

@@ -199,6 +199,11 @@ ordered total.
 
 ## Recent history (for context across sessions)
 
+- **2026-07-13:** Semi-finals opened for predictions after all 4 QF played.
+  n=101 FRA-ESP, 102 ENG-ARG (football-data SEMI_FINALS, matched by team pair
+  to the QF winners: W97=FRA, W98=ESP, W99=ENG, W100=ARG). Teams + official
+  kickoffs (already correct, no time change) in `wk.ts`; DB via
+  `fix-knockouts.sql` (30 rows: R32+R16+QF+SF).
 - **2026-07-08:** Quarter-finals opened for predictions after all R16 played.
   n=97 FRA-MAR, 98 ESP-BEL, 99 NOR-ENG, 100 ARG-SUI (football-data
   QUARTER_FINALS; matches our `W##` links). Teams + official kickoffs in
