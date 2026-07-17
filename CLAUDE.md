@@ -204,6 +204,11 @@ ordered total.
   to the QF winners: W97=FRA, W98=ESP, W99=ENG, W100=ARG). Teams + official
   kickoffs (already correct, no time change) in `wk.ts`; DB via
   `fix-knockouts.sql` (30 rows: R32+R16+QF+SF).
+- **2026-07-08:** Bracket fully resolved — SF (n=101 FRA-ESP, 102 ENG-ARG),
+  3rd place (n=103 FRA-ENG) and final (n=104 ESP-ARG) all open for predictions.
+  football-data had the whole knockout tree resolved; filled from its
+  SEMI_FINALS / THIRD_PLACE / FINAL. `fix-knockouts.sql` now covers all 32
+  resolved ties. Every knockout round matched our `W##`/`V##` links.
 - **2026-07-08:** Quarter-finals opened for predictions after all R16 played.
   n=97 FRA-MAR, 98 ESP-BEL, 99 NOR-ENG, 100 ARG-SUI (football-data
   QUARTER_FINALS; matches our `W##` links). Teams + official kickoffs in
