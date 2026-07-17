@@ -182,8 +182,8 @@ insert into matches (id, stage, group_id, kick_at, home_team, away_team, home_sl
 (100, 'qf', null, '2026-07-12T01:00:00.000Z', 'ARG', 'SUI', null, null),
 (101, 'sf', null, '2026-07-14T19:00:00.000Z', 'FRA', 'ESP', null, null),
 (102, 'sf', null, '2026-07-15T19:00:00.000Z', 'ENG', 'ARG', null, null),
-(103, 'third', null, '2026-07-18T21:00:00.000Z', null, null, 'V101', 'V102'),
-(104, 'final', null, '2026-07-19T19:00:00.000Z', null, null, 'W101', 'W102')
+(103, 'third', null, '2026-07-18T21:00:00.000Z', 'FRA', 'ENG', null, null),
+(104, 'final', null, '2026-07-19T19:00:00.000Z', 'ESP', 'ARG', null, null)
 on conflict (id) do update set
   stage     = excluded.stage,
   group_id  = excluded.group_id,

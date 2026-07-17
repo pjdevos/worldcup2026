@@ -265,12 +265,13 @@ export const SF: KnockoutTie[] = [
   { n: 102, date: "2026-07-15", kick: "21:00", left: "ENG", right: "ARG", venue: "Mercedes-Benz, Atlanta" },
 ];
 
+// 3rd place + final resolved from official SF results (football-data.org, 2026-07-15).
 export const THIRD_PLACE: KnockoutTie = {
   n: 103,
   date: "2026-07-18",
   kick: "23:00",
-  left: "V101",
-  right: "V102",
+  left: "FRA",
+  right: "ENG",
   venue: "Hard Rock Stadium, Miami",
 };
 
@@ -278,8 +279,8 @@ export const FINAL: KnockoutTie = {
   n: 104,
   date: "2026-07-19",
   kick: "21:00",
-  left: "W101",
-  right: "W102",
+  left: "ESP",
+  right: "ARG",
   venue: "MetLife, New York/New Jersey",
 };
 
