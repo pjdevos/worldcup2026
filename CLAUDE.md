@@ -204,6 +204,11 @@ ordered total.
   to the QF winners: W97=FRA, W98=ESP, W99=ENG, W100=ARG). Teams + official
   kickoffs (already correct, no time change) in `wk.ts`; DB via
   `fix-knockouts.sql` (30 rows: R32+R16+QF+SF).
+- **2026-07-19:** Tournament over — Spain beat Argentina 1-0 in the final;
+  Mbappé top scorer. Match points for the final + 3rd place (FRA-ENG 4-6) are
+  auto-scored by the daily cron. The one-off top-scorer bonus (25 pts to
+  everyone who picked Mbappé) is in `supabase/seed/award-topscorer-bonus.sql`
+  — run once in the Supabase SQL editor (additive, so not idempotent).
 - **2026-07-08:** Bracket fully resolved — SF (n=101 FRA-ESP, 102 ENG-ARG),
   3rd place (n=103 FRA-ENG) and final (n=104 ESP-ARG) all open for predictions.
   football-data had the whole knockout tree resolved; filled from its
